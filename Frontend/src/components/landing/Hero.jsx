@@ -11,7 +11,7 @@ function CoachUnderline({ children }) {
         <path
           d="M3 8 C 40 3, 80 10, 120 6 S 185 4, 197 7"
           fill="none"
-          stroke="#7c3aed"
+          stroke="#0e7c86"
           strokeWidth="4"
           strokeLinecap="round"
         />

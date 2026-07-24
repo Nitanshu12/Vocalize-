@@ -9,7 +9,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <WaveMark className="w-7 h-5" color="#a78bfa" />
+              <WaveMark className="w-7 h-5" color="#2ba3ab" />
               <span className="font-display text-xl font-semibold text-paper">Vocalize</span>
             </div>
             <p className="text-sm text-paper/40 max-w-xs leading-relaxed">

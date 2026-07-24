@@ -77,7 +77,7 @@ export default function Modes() {
           ))}
         </Reveal>
 
-        <WaveDivider className="mt-20" color="#d6d0c4" />
+        <WaveDivider className="mt-20" color="#cdd9d7" />
       </div>
     </section>
   )

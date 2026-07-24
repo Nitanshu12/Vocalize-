@@ -4,6 +4,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Onboarding from './pages/Onboarding'
 import AppHome from './pages/AppHome'
+import Practice from './pages/Practice'
 import CursorTrail from './components/ui/CursorTrail'
 import RequireAuth from './components/auth/RequireAuth'
 import { AuthProvider } from './context/AuthContext'
@@ -30,6 +31,14 @@ export default function App() {
             element={
               <RequireAuth>
                 <AppHome />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/app/practice"
+            element={
+              <RequireAuth>
+                <Practice />
               </RequireAuth>
             }
           />

@@ -11,12 +11,12 @@ export default function AuthLayout({ eyebrow, title, subtitle, children }) {
         <div className="absolute bottom-0 -right-20 w-[320px] h-[320px] bg-gold/10 rounded-full blur-3xl pointer-events-none" />
 
         <Link to="/" className="relative flex items-center gap-2.5">
-          <WaveMark className="w-7 h-5" color="#a78bfa" />
+          <WaveMark className="w-7 h-5" color="#2ba3ab" />
           <span className="font-display text-xl font-semibold text-paper tracking-tight">Vocalize</span>
         </Link>
 
         <div className="relative">
-          <WaveMark className="w-12 h-8 mb-8" color="#a78bfa" animate />
+          <WaveMark className="w-12 h-8 mb-8" color="#2ba3ab" animate />
           <h2 className="font-display text-4xl font-semibold text-paper leading-[1.15] tracking-tight mb-5 max-w-sm">
             You rehearse in your head. The interview happens out loud.
           </h2>

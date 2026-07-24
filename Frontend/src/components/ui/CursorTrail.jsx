@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-const COLORS = ['#4c1d95', '#5b21b6', '#292524', '#78350f', '#831843']
+const COLORS = ['#0b636b', '#0e7c86', '#094e55', '#2ba3ab', '#0f2a2e']
 
 export default function CursorTrail() {
   const canvasRef = useRef(null)
@@ -119,13 +119,13 @@ export default function CursorTrail() {
         ctx.globalAlpha = 1
         ctx.beginPath()
         ctx.arc(cursor.x, cursor.y, 4.5, 0, Math.PI * 2)
-        ctx.fillStyle = '#1c1917'
+        ctx.fillStyle = '#0f2a2e'
         ctx.fill()
 
         ctx.globalAlpha = 0.55
         ctx.beginPath()
         ctx.arc(cursor.x, cursor.y, 9, 0, Math.PI * 2)
-        ctx.strokeStyle = '#4c1d95'
+        ctx.strokeStyle = '#0b636b'
         ctx.lineWidth = 1.5
         ctx.stroke()
       }

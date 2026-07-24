@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { authApi } from '../lib/api'
+import { authApi, ttsApi } from '../lib/api'
 
 const AuthContext = createContext(null)
 
@@ -43,8 +43,23 @@ export function AuthProvider({ children }) {
     setStatus('anonymous')
   }, [])
 
+  // Saves onboarding answers, then replaces the user in state with the returned
+  // record — which now has onboarding_completed_at set, so RequireAuth lets the
+  // user into /app instead of bouncing them back to /onboarding.
+  const completeOnboarding = useCallback(
+    async (answers) => {
+      const { user } = await authApi.completeOnboarding(accessToken, answers)
+      setUser(user)
+    },
+    [accessToken]
+  )
+
+  const fetchGreeting = useCallback(() => ttsApi.greeting(accessToken), [accessToken])
+
   return (
-    <AuthContext.Provider value={{ user, accessToken, status, login, register, logout }}>
+    <AuthContext.Provider
+      value={{ user, accessToken, status, login, register, logout, completeOnboarding, fetchGreeting }}
+    >
       {children}
     </AuthContext.Provider>
   )

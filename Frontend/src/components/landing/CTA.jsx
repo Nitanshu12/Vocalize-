@@ -8,7 +8,7 @@ export default function CTA() {
     <section className="relative grain py-28 bg-ink overflow-hidden">
       <Reveal className="relative max-w-3xl mx-auto px-6 text-center">
 
-        <WaveMark className="w-14 h-9 mx-auto mb-10" color="#a78bfa" animate />
+        <WaveMark className="w-14 h-9 mx-auto mb-10" color="#2ba3ab" animate />
 
         <h2 className="font-display text-4xl lg:text-[3.4rem] font-semibold text-paper tracking-tight leading-[1.12] mb-6">
           Your next interview

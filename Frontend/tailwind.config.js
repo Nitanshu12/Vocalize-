@@ -9,22 +9,25 @@ export default {
         hand: ['Caveat', 'cursive'],
       },
       colors: {
+        // "Ocean · Teal" design system — cool mist paper, teal-black ink, a
+        // single teal brand voice. Semantic feedback colors (coral/leaf/gold)
+        // stay separate from the brand and must not be reused as the accent.
         paper: {
-          DEFAULT: '#faf7f2',
-          dark: '#f3efe7',
+          DEFAULT: '#f1f6f5',
+          dark: '#e6efee',
         },
         ink: {
-          DEFAULT: '#1c1917',
-          soft: '#57534e',
-          faint: '#a8a29e',
+          DEFAULT: '#0f2a2e',
+          soft: '#4c6b6e',
+          faint: '#8fa8aa',
         },
         brand: {
-          50:  '#f5f3ff',
-          100: '#ede9fe',
-          200: '#ddd6fe',
-          600: '#7c3aed',
-          700: '#6d28d9',
-          800: '#5b21b6',
+          50:  '#eaf6f5',
+          100: '#d3ebe9',
+          200: '#a7d8d4',
+          600: '#0e7c86',
+          700: '#0b636b',
+          800: '#094e55',
         },
         coral: '#e5484d',
         leaf: '#2f9e6e',
