@@ -32,3 +32,34 @@ alter table users add column if not exists onboarding_completed_at timestamptz;
 alter table users add column if not exists practice_goal text;
 alter table users add column if not exists confidence_level text;
 alter table users add column if not exists weekly_time_commitment text;
+
+-- Schema v3: Practice Mode — one row per completed practice session, plus
+-- gamification counters on the user. Idempotent; existing rows are unaffected.
+create table if not exists practice_sessions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references users(id) on delete cascade,
+  source text not null,                  -- 'library' | 'custom'
+  paragraph_id text,                     -- library paragraph slug; null for custom
+  custom_text text,                      -- user's own text; null for library
+  mode text not null default 'audio',    -- 'audio' | 'video'
+  timed boolean not null default false,
+  prep_seconds integer,
+  duration_seconds integer not null,
+  transcript text not null,
+  wpm integer,
+  filler_count integer,
+  coverage_pct integer,                  -- % match vs reference; null if no reference
+  keyphrase_hit_pct integer,             -- % of key phrases spoken; null for custom
+  overall_score integer,                 -- 0..100 combined score
+  points_earned integer not null default 0,
+  ai_feedback jsonb,                     -- LLM coach output; null if not generated
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_practice_sessions_user_created
+  on practice_sessions (user_id, created_at desc);
+
+alter table users add column if not exists total_points integer not null default 0;
+alter table users add column if not exists current_streak integer not null default 0;
+alter table users add column if not exists longest_streak integer not null default 0;
+alter table users add column if not exists last_practice_date date;
