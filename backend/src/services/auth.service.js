@@ -32,6 +32,24 @@ export async function verifyPassword(user, password) {
   return bcrypt.compare(password, user.password_hash)
 }
 
+// Saves onboarding answers and stamps completion. Setting onboarding_completed_at
+// is what lets RequireAuth stop redirecting the user back to /onboarding.
+export async function completeOnboarding(userId, { practice_goal, confidence_level, weekly_time_commitment }) {
+  const { rows } = await pool.query(
+    `update users
+     set practice_goal = $2,
+         confidence_level = $3,
+         weekly_time_commitment = $4,
+         onboarding_completed_at = now(),
+         updated_at = now()
+     where id = $1
+     returning id, email, name, created_at, onboarding_completed_at,
+               practice_goal, confidence_level, weekly_time_commitment`,
+    [userId, practice_goal, confidence_level, weekly_time_commitment]
+  )
+  return rows[0] ?? null
+}
+
 export async function storeRefreshToken(userId, { tokenHash, expiresAt }, meta = {}) {
   const { rows } = await pool.query(
     `insert into refresh_tokens (user_id, token_hash, expires_at, user_agent, ip_address)
