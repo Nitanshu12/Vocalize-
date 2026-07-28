@@ -1,8 +1,8 @@
 import { Router } from 'express'
 import rateLimit from 'express-rate-limit'
-import { register, login, refresh, logout, me } from '../controllers/auth.controller.js'
+import { register, login, refresh, logout, me, onboarding } from '../controllers/auth.controller.js'
 import { validate } from '../middleware/validate.js'
-import { registerSchema, loginSchema } from '../validators/auth.validator.js'
+import { registerSchema, loginSchema, onboardingSchema } from '../validators/auth.validator.js'
 import { authenticate } from '../middleware/authenticate.js'
 
 const router = Router()
@@ -22,5 +22,6 @@ router.post('/login', authLimiter, validate(loginSchema), login)
 router.post('/refresh', refresh)
 router.post('/logout', logout)
 router.get('/me', authenticate, me)
+router.patch('/onboarding', authenticate, validate(onboardingSchema), onboarding)
 
 export default router
