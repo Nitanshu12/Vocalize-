@@ -14,7 +14,7 @@ import {
 import { WaveMark } from '../components/ui/Waveform'
 import { useAuth } from '../context/AuthContext'
 import { practiceApi } from '../lib/api'
-import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
+import { useStreamingTranscription } from '../hooks/useStreamingTranscription'
 
 /* Practice Mode — one page, four steps:
  *   setup   → pick a script (library/custom), mode (audio/video), timer
@@ -22,9 +22,11 @@ import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
  *   record  → mic/camera on, live transcript + live pace meter
  *   results → server-graded scores, points/streak, AI coach (or premium lock)
  *
- * The recording never leaves the browser (free-tier decision): MediaRecorder
- * keeps it in memory for replay only; the server receives just the transcript
- * and timing, and does all grading itself.
+ * Web Speech gives a live transcript for the in-session pace meter; on finish we
+ * upload the recorded audio so the server can transcribe it with Whisper (the
+ * authoritative transcript used for scoring). The audio is transcribed and
+ * discarded server-side — never stored. The local blob stays in the browser for
+ * the "watch yourself back" replay only.
  */
 
 const DIFFICULTY_BADGE = {
@@ -75,7 +77,7 @@ function Chip({ active, onClick, children }) {
 
 export default function Practice() {
   const { accessToken } = useAuth()
-  const speech = useSpeechRecognition()
+  const speech = useStreamingTranscription()
 
   const [step, setStep] = useState('setup') // setup | prep | record | results
   const [paragraphs, setParagraphs] = useState([])
@@ -102,6 +104,8 @@ export default function Practice() {
   const chunksRef = useRef([])
   const videoRef = useRef(null)
   const urlRef = useRef(null)
+  const blobRef = useRef(null) // the recorded Blob, for upload + replay
+  const stopResolveRef = useRef(null) // resolves once MediaRecorder.onstop fires
   const startingRef = useRef(false)
   const [recordingUrl, setRecordingUrl] = useState(null)
   const [mediaError, setMediaError] = useState('')
@@ -140,6 +144,7 @@ export default function Practice() {
       urlRef.current = null
       setRecordingUrl(null)
     }
+    blobRef.current = null
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -153,21 +158,32 @@ export default function Practice() {
       }
       recorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: recorder.mimeType })
+        blobRef.current = blob
         const url = URL.createObjectURL(blob)
         urlRef.current = url
         setRecordingUrl(url)
+        streamRef.current?.getTracks().forEach((t) => t.stop())
+        streamRef.current = null
+        // Hand the finished blob to whoever is awaiting the stop.
+        if (stopResolveRef.current) {
+          stopResolveRef.current(blob)
+          stopResolveRef.current = null
+        }
       }
       recorderRef.current = recorder
       recorder.start()
-      speech.start()
+      // Start live streaming transcription on the SAME mic stream.
+      await speech.start(stream)
       startedAtRef.current = performance.now()
       setElapsed(0)
       setStep('record')
     } catch {
+      // Clean up mic/recorder if capture or the streaming connection failed.
+      if (recorderRef.current?.state !== 'inactive') recorderRef.current?.stop()
+      streamRef.current?.getTracks().forEach((t) => t.stop())
+      streamRef.current = null
       setMediaError(
-        mode === 'video'
-          ? 'We need microphone and camera access — allow them in your browser and try again.'
-          : 'We need microphone access — allow it in your browser and try again.'
+        'We couldn’t start the session — allow mic/camera access, check your connection, and try again.'
       )
       setStep('setup')
     } finally {
@@ -175,11 +191,19 @@ export default function Practice() {
     }
   }
 
-  function stopMedia() {
-    speech.stop()
-    if (recorderRef.current?.state !== 'inactive') recorderRef.current?.stop()
-    streamRef.current?.getTracks().forEach((t) => t.stop())
-    streamRef.current = null
+  // Stop the recorder and resolve with the finished Blob. onstop (set in
+  // startRecording) builds the blob, stops the tracks, and calls the resolver.
+  function stopAndGetBlob() {
+    const recorder = recorderRef.current
+    if (!recorder || recorder.state === 'inactive') {
+      streamRef.current?.getTracks().forEach((t) => t.stop())
+      streamRef.current = null
+      return Promise.resolve(blobRef.current)
+    }
+    return new Promise((resolve) => {
+      stopResolveRef.current = resolve
+      recorder.stop()
+    })
   }
 
   async function finishRecording() {
@@ -187,8 +211,9 @@ export default function Practice() {
       3600,
       Math.max(1, Math.round((performance.now() - startedAtRef.current) / 1000))
     )
-    const transcript = `${speech.transcript} ${speech.interim}`.trim()
-    stopMedia()
+    // The authoritative transcript + word timestamps come from the streaming STT.
+    const { transcript, words } = await speech.stop()
+    await stopAndGetBlob() // finish the local replay recording (blob stays on-device)
 
     if (!transcript) {
       setSubmitError("We couldn't hear any words — check your mic and try again.")
@@ -206,6 +231,7 @@ export default function Practice() {
         timed,
         durationSeconds,
         transcript,
+        words,
         ...(source === 'library' ? { paragraphId } : { customText: customText.trim() }),
         ...(timed ? { prepSeconds: prepUsedRef.current } : {}),
       }
@@ -235,6 +261,7 @@ export default function Practice() {
       URL.revokeObjectURL(urlRef.current)
       urlRef.current = null
     }
+    blobRef.current = null
     setRecordingUrl(null)
     setResult(null)
     setSubmitError('')
@@ -326,8 +353,8 @@ export default function Practice() {
 
             {!speech.supported && (
               <p className="text-sm text-gold bg-gold/10 border border-gold/20 rounded-lg px-4 py-3 mb-5">
-                Live transcription needs Chrome or Edge — your browser doesn't support it, so
-                scoring won't work here.
+                Your browser doesn't support the live audio capture needed for scoring. Please use a
+                recent Chrome, Edge, Safari, or Firefox.
               </p>
             )}
             {(loadError || mediaError || submitError) && (
@@ -425,8 +452,16 @@ export default function Practice() {
               Start practicing <ArrowRight size={19} />
             </button>
             <p className="text-xs text-ink-faint mt-3">
-              Your recording stays on this device — only the transcript is scored.
+              Your audio is transcribed for scoring, then discarded — recordings are never stored.
             </p>
+            <div className="mt-6">
+              <Link
+                to="/app/dashboard"
+                className="text-sm font-medium text-ink-soft hover:text-ink transition-colors"
+              >
+                Skip for now →
+              </Link>
+            </div>
           </div>
         )}
 
@@ -569,6 +604,10 @@ export default function Practice() {
                       label="Key phrases"
                     />
                   )}
+                  {result.session.long_pauses !== null &&
+                    result.session.long_pauses !== undefined && (
+                      <MetricTile value={result.session.long_pauses} label="Long pauses" />
+                    )}
                 </div>
 
                 {/* AI coach — feedback, premium lock, or quiet failure note */}
@@ -651,10 +690,10 @@ export default function Practice() {
                     <RotateCcw size={16} /> Practice again
                   </button>
                   <Link
-                    to="/app"
+                    to="/app/dashboard"
                     className="inline-flex items-center px-7 py-3.5 rounded-full border border-ink/20 text-ink font-semibold hover:border-ink/50 transition-colors"
                   >
-                    Back home
+                    Go to dashboard
                   </Link>
                 </div>
               </div>

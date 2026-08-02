@@ -14,8 +14,16 @@ const schema = z.object({
     .transform((v) => v === 'true'),
   NODE_ENV: z.string().default('development'),
   ELEVENLABS_API_KEY: z.string().min(1, 'ELEVENLABS_API_KEY is required'),
-  // Default is ElevenLabs' stock "Rachel" voice — override in .env to change it.
-  ELEVENLABS_VOICE_ID: z.string().default('21m00Tcm4TlvDq8ikWAM'),
+  // Default is ElevenLabs' "Sarah" voice (warm, reassuring) — works on the free
+  // API tier. Override in .env with any voice_id from your account's voice list.
+  ELEVENLABS_VOICE_ID: z.string().default('EXAVITQu4vr4xnSDxMaL'),
+  GROQ_API_KEY: z.string().min(1, 'GROQ_API_KEY is required'),
+  // Default is a Llama model that supports tool calling on Groq's free tier —
+  // required for LangChain's structured (JSON) output to work reliably.
+  GROQ_MODEL: z.string().default('llama-3.3-70b-versatile'),
+  // AssemblyAI powers the authoritative transcript: word timestamps + reliable
+  // disfluency (um/uh) detection, which Whisper strips out.
+  ASSEMBLYAI_API_KEY: z.string().min(1, 'ASSEMBLYAI_API_KEY is required'),
 })
 
 export const env = schema.parse(process.env)

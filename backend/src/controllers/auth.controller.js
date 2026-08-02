@@ -9,6 +9,7 @@ import {
   rotateRefreshToken,
   revokeRefreshToken,
   revokeAllUserTokens,
+  completeOnboarding,
 } from '../services/auth.service.js'
 import { signAccessToken, generateRefreshToken } from '../services/token.service.js'
 
@@ -115,6 +116,18 @@ export async function logout(req, res, next) {
     }
     res.clearCookie(REFRESH_COOKIE, { path: REFRESH_COOKIE_PATH })
     res.status(204).send()
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function onboarding(req, res, next) {
+  try {
+    const user = await completeOnboarding(req.user.id, req.body)
+    if (!user) {
+      return res.status(404).json({ error: 'NotFound', message: 'User no longer exists' })
+    }
+    res.json({ user })
   } catch (err) {
     next(err)
   }

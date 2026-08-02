@@ -22,7 +22,7 @@ export default function Login() {
     setSubmitting(true)
     try {
       await login(form)
-      navigate('/app')
+      navigate('/app/dashboard')
     } catch (err) {
       setFormError(err.message)
     } finally {

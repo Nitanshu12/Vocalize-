@@ -63,3 +63,7 @@ alter table users add column if not exists total_points integer not null default
 alter table users add column if not exists current_streak integer not null default 0;
 alter table users add column if not exists longest_streak integer not null default 0;
 alter table users add column if not exists last_practice_date date;
+
+-- Schema v4: Whisper transcription upgrade — word timestamps let us count the
+-- long pauses (>1.5s gaps) in a session. Idempotent.
+alter table practice_sessions add column if not exists long_pauses integer;

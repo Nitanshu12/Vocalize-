@@ -42,9 +42,13 @@ export const authApi = {
 
 export const practiceApi = {
   paragraphs: (token) => request('/api/v1/practice/paragraphs', { token }),
+  history: (token) => request('/api/v1/practice/sessions', { token }),
+  stats: (token) => request('/api/v1/practice/stats', { token }),
+  // Short-lived token for the browser's AssemblyAI streaming websocket.
+  streamingToken: (token) => request('/api/v1/practice/streaming-token', { token }),
+  // Transcript + word timestamps come from the client's streaming STT — plain JSON.
   submitSession: (token, payload) =>
     request('/api/v1/practice/sessions', { method: 'POST', body: payload, token }),
-  history: (token) => request('/api/v1/practice/sessions', { token }),
 }
 
 export const ttsApi = {
