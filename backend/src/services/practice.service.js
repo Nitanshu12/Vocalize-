@@ -156,10 +156,26 @@ export async function recordPracticeSession(userId, input) {
     ]
   )
 
-  const gamification = await updateGamification(userId, points)
+  const counters = await updateGamification(userId, points)
+
+  // Level-up detection: compare the level BEFORE this session's points were
+  // added against the level AFTER. The DB update returns the new total, so the
+  // old total is simply (new total - points earned this session). Backend is the
+  // single source of truth here — the client just plays the celebration.
+  const newTotal = counters?.total_points ?? points
+  const currentLevel = levelFromPoints(newTotal)
+  const previousLevel = levelFromPoints(newTotal - points)
+  const leveledUp = currentLevel.level > previousLevel.level
+
   return {
     session: rows[0],
-    gamification,
+    gamification: {
+      ...counters,
+      level: currentLevel,
+      leveledUp,
+      previousLevelNumber: leveledUp ? previousLevel.level : null,
+      pointsEarned: points,
+    },
     ai: {
       locked: !aiEligible, // true once the free allowance is used up (premium)
       error: aiError, // true if the coach call failed but the session still saved

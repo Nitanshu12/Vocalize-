@@ -3,17 +3,6 @@ import pcmWorkletUrl from '../lib/pcm-worklet.js?url'
 import { useAuth } from '../context/AuthContext'
 import { practiceApi } from '../lib/api'
 
-// Real-time transcription via AssemblyAI's streaming websocket.
-//
-// Flow: get a short-lived token from our backend -> open the AssemblyAI socket ->
-// pipe the mic through an AudioWorklet that emits 16 kHz PCM -> receive live
-// "Turn" messages (partial + final) and accumulate the final transcript + word
-// timestamps. Because it transcribes AS you speak, there's ~no wait on finish.
-//
-// Exposes a shape close to the old Web Speech hook so the page barely changes:
-//   { supported, connecting, listening, transcript, interim, error, start, stop }
-// `start(stream)` takes the same MediaStream the page already opened for the
-// recorder; `stop()` resolves with { transcript, words } for scoring.
 
 const WS_URL = 'wss://streaming.assemblyai.com/v3/ws'
 const AudioContextImpl =
@@ -86,6 +75,9 @@ export function useStreamingTranscription() {
             const ctx = new AudioContextImpl()
             ctxRef.current = ctx
             await ctx.audioWorklet.addModule(pcmWorkletUrl)
+            // Contexts often start "suspended" outside a direct click — resume it
+            // or the worklet never runs and no audio is sent.
+            await ctx.resume()
             const source = ctx.createMediaStreamSource(stream)
             const node = new AudioWorkletNode(ctx, 'pcm-processor')
             node.port.onmessage = (e) => {

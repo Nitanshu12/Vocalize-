@@ -12,6 +12,7 @@ import {
   Video,
 } from 'lucide-react'
 import { WaveMark } from '../components/ui/Waveform'
+import LevelUpCelebration from '../components/ui/LevelUpCelebration'
 import { useAuth } from '../context/AuthContext'
 import { practiceApi } from '../lib/api'
 import { useStreamingTranscription } from '../hooks/useStreamingTranscription'
@@ -114,6 +115,7 @@ export default function Practice() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [result, setResult] = useState(null)
+  const [levelUp, setLevelUp] = useState(null) // set when the session crosses a level
 
   /* ------------------------------ data load ------------------------------ */
   useEffect(() => {
@@ -237,6 +239,13 @@ export default function Practice() {
       }
       const res = await practiceApi.submitSession(accessToken, payload)
       setResult(res)
+      // Celebrate a level-up once the results screen is showing.
+      if (res.gamification?.leveledUp && res.gamification.level) {
+        setLevelUp({
+          level: res.gamification.level,
+          previousLevel: res.gamification.previousLevelNumber,
+        })
+      }
     } catch (err) {
       setSubmitError(err.message || 'Something went wrong while scoring — please try again.')
     } finally {
@@ -264,6 +273,7 @@ export default function Practice() {
     blobRef.current = null
     setRecordingUrl(null)
     setResult(null)
+    setLevelUp(null)
     setSubmitError('')
     setElapsed(0)
     setStep('setup')
@@ -701,6 +711,14 @@ export default function Practice() {
           </div>
         )}
       </div>
+
+      {levelUp && (
+        <LevelUpCelebration
+          level={levelUp.level}
+          previousLevel={levelUp.previousLevel}
+          onClose={() => setLevelUp(null)}
+        />
+      )}
     </div>
   )
 }
