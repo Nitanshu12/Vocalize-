@@ -1,24 +1,27 @@
+"""
+Interview types (the config registry) + the in-flight interview state.
+
+DESIGN PATTERN: each interview type is a declarative config object. One generic
+agent reads a config and runs the whole interview from it. Adding a new type =
+adding an entry to REGISTRY below — no engine/node code changes (Open/Closed).
+
+NOTE: competencies, weights, BARS anchors and questions are PROVISIONAL — refine
+them after real-world scoring research. They live in config, so refining = edit
+values here, not logic anywhere.
+"""
 
 from __future__ import annotations
+
 from dataclasses import dataclass
-@dataclass(frozen=True)
-class Persona:
-    name: str
-    title: str
-    tone: str  # short style hint injected into the agent's system prompt
+from typing import TypedDict
 
-
-@dataclass(frozen=True)
-class Competency:
-    key: str
-    label: str
-    description: str
-    anchors: dict[int, str]
-    weight: float = 1.0
+from app.domain.competency import Competency, Persona
 
 
 @dataclass(frozen=True)
 class InterviewType:
+    """A full, self-contained definition of one kind of interview."""
+
     id: str
     label: str
     description: str
@@ -30,7 +33,11 @@ class InterviewType:
     max_questions: int
     target_minutes: int
     language_options: tuple[str, ...] = ("en", "hi")
-            
+
+
+# --------------------------------------------------------------------------- #
+# The registry — add a new interview type by adding an entry here.
+# --------------------------------------------------------------------------- #
 HR_SCREENING = InterviewType(
     id="hr_screening",
     label="HR Screening",
@@ -164,8 +171,7 @@ PRODUCT = InterviewType(
     target_minutes=15,
 )
 
-# The registry itself. Insertion order is preserved (Python 3.7+), so this is
-# also the order the UI shows them in.
+# Insertion order is preserved, so this is also the order the UI shows them in.
 REGISTRY: dict[str, InterviewType] = {
     HR_SCREENING.id: HR_SCREENING,
     PRODUCT.id: PRODUCT,
@@ -179,7 +185,17 @@ def get_interview_type(type_id: str) -> InterviewType | None:
     return REGISTRY.get(type_id)
 
 
+def require_type(type_id: str) -> InterviewType:
+    """Like get_interview_type, but raises instead of returning None."""
+    t = REGISTRY.get(type_id)
+    if t is None:
+        raise ValueError(f"Unknown interview type: {type_id!r}")
+    return t
+
+
 def to_public(t: InterviewType) -> dict:
+    """Browser-safe view: drops the scoring rubric and seed questions so users
+    can't see or game the grading, or peek at upcoming questions."""
     return {
         "id": t.id,
         "label": t.label,
@@ -194,16 +210,38 @@ def to_public(t: InterviewType) -> dict:
 
 
 def list_public_types() -> list[dict]:
-    """Every type in registry order, browser-safe — what the setup screen renders."""
+    """Every type in registry order, browser-safe — powers the setup screen."""
     return [to_public(t) for t in REGISTRY.values()]
 
-if __name__ == "__main__":
-    import json
 
-    print("Interview types (public view the frontend will receive):\n")
-    print(json.dumps(list_public_types(), indent=2, ensure_ascii=False))
+# --------------------------------------------------------------------------- #
+# In-flight interview state — the shared memory the LangGraph agent carries.
+# --------------------------------------------------------------------------- #
+class Turn(TypedDict):
+    question: str
+    answer: str
+    evaluation: dict | None  # AnswerEvaluation.model_dump()
 
-    print("\nWeight sanity check (all equal for now):")
-    for t in REGISTRY.values():
-        weights = {c.key: c.weight for c in t.competencies}
-        print(f"  {t.label:14s} -> {weights}")
+
+class InterviewState(TypedDict):
+    type_id: str
+    language: str  # "en" | "hi"
+    turns: list[Turn]  # completed Q&A + their evaluations
+    current_question: str  # the question awaiting an answer ("" when none)
+    last_answer: str  # the answer just captured, fed into evaluate_node
+    finished: bool
+    report: dict | None  # final scorecard + coach feedback (set by feedback_node)
+
+
+def initial_state(type_id: str, language: str) -> InterviewState:
+    """A fresh interview's starting state."""
+    require_type(type_id)  # validate early
+    return {
+        "type_id": type_id,
+        "language": language,
+        "turns": [],
+        "current_question": "",
+        "last_answer": "",
+        "finished": False,
+        "report": None,
+    }
