@@ -25,3 +25,23 @@ export async function greeting(req, res, next) {
     next(err)
   }
 }
+
+// Speaks an arbitrary short line — used by the interviewer's voice. The text is
+// the AI-generated question our own agent produced, but since it arrives from
+// the client we cap the length and rate-limit the route to bound ElevenLabs
+// quota abuse.
+export async function speak(req, res, next) {
+  try {
+    const text = (req.body?.text ?? '').toString().trim().slice(0, 800)
+    if (!text) {
+      return res.status(400).json({ error: 'ValidationError', message: 'text is required' })
+    }
+    const audio = await synthesizeSpeech(text)
+    res.set('Content-Type', 'audio/mpeg')
+    res.set('Cache-Control', 'no-store')
+    res.send(audio)
+  } catch (err) {
+    err.status = err.status ?? 502
+    next(err)
+  }
+}
