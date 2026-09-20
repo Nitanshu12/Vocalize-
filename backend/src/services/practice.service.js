@@ -55,7 +55,7 @@ function resolveReference({ source, paragraphId, customText }) {
 //   practiced today already  -> streak unchanged
 //   practiced yesterday      -> streak + 1
 //   otherwise (gap / first)  -> reset to 1
-async function updateGamification(userId, points) {
+export async function updateGamification(userId, points) {
   const streakExpr = `case
       when last_practice_date = current_date then current_streak
       when last_practice_date = current_date - 1 then current_streak + 1
