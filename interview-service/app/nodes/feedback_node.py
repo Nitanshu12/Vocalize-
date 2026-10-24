@@ -23,5 +23,11 @@ def feedback_node(state: InterviewState) -> dict:
         .invoke([SystemMessage(content=system), HumanMessage(content=human)])
     )
 
-    report = {**breakdown, "coach": coach.model_dump()}
+    report = {
+        **breakdown,
+        "coach": coach.model_dump(),
+        "typeId": t.id,
+        "label": t.label,
+        "language": state["language"],
+    }
     return {"report": report, "finished": True}

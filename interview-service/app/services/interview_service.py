@@ -1,13 +1,3 @@
-"""
-Orchestration layer — drives the LangGraph agent for a whole interview.
-
-The API talks to THIS, not to the graph directly. It maps the turn-based HTTP
-flow onto the graph's pause/resume:
-
-  start(type, language) -> run until the first question (graph pauses) -> question
-  answer(thread, text)  -> feed the answer, resume -> next question OR final report
-"""
-
 from __future__ import annotations
 
 import uuid
@@ -26,9 +16,14 @@ class InterviewService:
         # thread_id is how the checkpointer keys each interview's saved state.
         return {"configurable": {"thread_id": thread_id}}
 
-    def start(self, type_id: str, language: str) -> dict:
+    def start(self, type_id: str, language: str, profile: dict | None = None) -> dict:
         thread_id = str(uuid.uuid4())
-        state = self._graph.invoke(initial_state(type_id, language), self._config(thread_id))
+        # The profile goes into the graph's initial state, so the checkpointer
+        # carries it across every turn of this interview without the gateway
+        # having to resend it on each answer.
+        state = self._graph.invoke(
+            initial_state(type_id, language, profile), self._config(thread_id)
+        )
         self._repo.create(thread_id, type_id, language)
         return {"threadId": thread_id, "question": state["current_question"]}
 

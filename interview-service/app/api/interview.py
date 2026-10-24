@@ -27,8 +27,9 @@ def verify_internal(x_internal_key: str = Header(default="", alias="X-Internal-K
 # Types (public — power the setup + brief screens)
 # --------------------------------------------------------------------------- #
 @router.get("/types")
-def interview_types() -> list[dict]:
-    return list_public_types()
+def interview_types(track: str | None = None) -> list[dict]:
+    """Rounds on offer. `?track=school` narrows them to that audience."""
+    return list_public_types(track)
 
 
 @router.get("/types/{type_id}")
@@ -46,7 +47,7 @@ def interview_type(type_id: str) -> dict:
 def start(body: StartRequest) -> dict:
     """Begin an interview; returns { threadId, question } (the opening line)."""
     try:
-        return _service.start(body.typeId, body.language)
+        return _service.start(body.typeId, body.language, body.profile)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

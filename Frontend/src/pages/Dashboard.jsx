@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import { WaveMark } from '../components/ui/Waveform'
 import { useAuth } from '../context/AuthContext'
-import { practiceApi } from '../lib/api'
+import { practiceApi, interviewApi } from '../lib/api'
 
 /* The "Speaker's Journey" dashboard — the product's home base. Everything here is
  * driven by real data from GET /practice/stats (level/XP, streak, week, totals)
@@ -89,7 +89,7 @@ function StatTile({ value, label }) {
   )
 }
 
-function ModeCard({ icon: Icon, title, body, live, unlockLabel }) {
+function ModeCard({ icon: Icon, title, body, live, unlockLabel, to = '/app/practice' }) {
   const inner = (
     <div
       className={`relative h-full rounded-2xl border bg-white px-5 py-5 flex flex-col gap-1.5 transition-all ${
@@ -119,7 +119,7 @@ function ModeCard({ icon: Icon, title, body, live, unlockLabel }) {
     </div>
   )
   return live ? (
-    <Link to="/app/practice" className="block h-full">
+    <Link to={to} className="block h-full">
       {inner}
     </Link>
   ) : (
@@ -133,11 +133,14 @@ export default function Dashboard() {
 
   const [stats, setStats] = useState(null)
   const [sessions, setSessions] = useState([])
+  const [interviews, setInterviews] = useState([])
   const [paragraphTitles, setParagraphTitles] = useState({})
+  const [typeLabels, setTypeLabels] = useState({})
   const [status, setStatus] = useState('loading') // loading | ready | error
 
   useEffect(() => {
     let cancelled = false
+    // Core data — the dashboard can't render without these.
     Promise.all([
       practiceApi.stats(accessToken),
       practiceApi.history(accessToken),
@@ -153,10 +156,50 @@ export default function Dashboard() {
         setStatus('ready')
       })
       .catch(() => !cancelled && setStatus('error'))
+
+    // Interview data is additive — if it fails (e.g. table not migrated yet), the
+    // dashboard still loads with practice data instead of erroring out.
+    interviewApi
+      .history(accessToken)
+      .then((d) => !cancelled && setInterviews(d.sessions ?? []))
+      .catch(() => {})
+    interviewApi
+      .types(accessToken)
+      .then((d) => !cancelled && setTypeLabels(Object.fromEntries((d.types ?? []).map((t) => [t.id, t.label]))))
+      .catch(() => {})
+
     return () => {
       cancelled = true
     }
   }, [accessToken])
+
+  // One activity feed across practice + interview, newest first.
+  const recentItems = useMemo(() => {
+    const practice = sessions.map((s) => ({
+      key: `p-${s.id}`,
+      kind: 'practice',
+      title:
+        s.source === 'library'
+          ? paragraphTitles[s.paragraph_id] ?? 'Practice session'
+          : 'Your own script',
+      meta: `${s.timed ? 'timed' : 'relaxed'} · ${s.mode}`,
+      score: s.overall_score,
+      points: s.points_earned,
+      at: s.created_at,
+    }))
+    const interview = interviews.map((s) => ({
+      key: `i-${s.id}`,
+      kind: 'interview',
+      title: typeLabels[s.type_id] ?? 'Mock interview',
+      meta: 'mock interview',
+      score: s.overall_score,
+      points: s.points_earned,
+      at: s.created_at,
+    }))
+    return [...practice, ...interview]
+      .sort((a, b) => new Date(b.at) - new Date(a.at))
+      .slice(0, 6)
+  }, [sessions, interviews, paragraphTitles, typeLabels])
 
   // Today's quests — derived from today's sessions, no backend tracking needed.
   const quests = useMemo(() => {
@@ -316,9 +359,10 @@ export default function Dashboard() {
               />
               <ModeCard
                 icon={MessageCircle}
-                title="Interview drill"
-                body="Answer real questions on the clock."
-                unlockLabel="Level 4"
+                title="Mock interview"
+                body="A voice interviewer that listens, probes, and scores you."
+                live
+                to="/app/interview"
               />
               <ModeCard
                 icon={Presentation}
@@ -332,7 +376,7 @@ export default function Dashboard() {
             <section className="rounded-3xl border border-ink/10 bg-white px-6 py-5">
               <h2 className="font-display text-lg font-semibold text-ink mb-1">Recent sessions</h2>
               <p className="text-xs text-ink-faint mb-3">Your last few attempts.</p>
-              {sessions.length === 0 ? (
+              {recentItems.length === 0 ? (
                 <p className="text-sm text-ink-soft py-4">
                   No sessions yet —{' '}
                   <Link to="/app/practice" className="text-brand-700 font-semibold">
@@ -342,28 +386,33 @@ export default function Dashboard() {
                 </p>
               ) : (
                 <div>
-                  {sessions.map((s) => (
+                  {recentItems.map((s) => (
                     <div
-                      key={s.id}
+                      key={s.key}
                       className="flex items-center gap-3 py-2.5 border-t border-ink/8 first:border-t-0"
                     >
+                      <span
+                        className={`inline-flex items-center justify-center w-8 h-8 rounded-xl shrink-0 ${
+                          s.kind === 'interview'
+                            ? 'bg-brand-50 text-brand-700'
+                            : 'bg-ink/5 text-ink-soft'
+                        }`}
+                      >
+                        {s.kind === 'interview' ? <MessageCircle size={15} /> : <Mic size={15} />}
+                      </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-ink truncate">
-                          {s.source === 'library'
-                            ? paragraphTitles[s.paragraph_id] ?? 'Practice session'
-                            : 'Your own script'}
-                        </p>
+                        <p className="text-sm font-semibold text-ink truncate">{s.title}</p>
                         <p className="text-xs text-ink-faint">
-                          {relativeDay(s.created_at)} · {s.timed ? 'timed' : 'relaxed'} · {s.mode}
+                          {relativeDay(s.at)} · {s.meta}
                         </p>
                       </div>
                       <span
-                        className={`text-xs font-bold rounded-full px-2.5 py-1 tabular-nums ${scoreTone(s.overall_score)}`}
+                        className={`text-xs font-bold rounded-full px-2.5 py-1 tabular-nums ${scoreTone(s.score)}`}
                       >
-                        {s.overall_score}
+                        {s.score}
                       </span>
                       <span className="text-xs text-ink-soft tabular-nums w-9 text-right">
-                        +{s.points_earned}
+                        +{s.points}
                       </span>
                     </div>
                   ))}

@@ -5,12 +5,15 @@ import {
   saveInterviewResult,
   listInterviewSessions,
 } from '../services/interview.service.js'
+import { getProfile, getInterviewBrief } from '../services/profile.service.js'
 
 // The interview catalogue (browser-safe) — powers the setup + brief screens.
+// Narrowed to the user's track, so the rounds on offer match who they are.
 export async function listTypes(req, res, next) {
   try {
-    const types = await getInterviewTypes()
-    res.json({ types })
+    const { track } = await getProfile(req.user.id)
+    const types = await getInterviewTypes(track)
+    res.json({ types, track })
   } catch (err) {
     next(err)
   }
@@ -27,9 +30,13 @@ export async function history(req, res, next) {
 }
 
 // Begin an interview — returns { threadId, question } (the opening line).
+// The candidate brief is fetched server-side from our own database, never taken
+// from the request body: the browser cannot invent a background for itself.
+// A missing profile is fine — the agent falls back to generic questions.
 export async function start(req, res, next) {
   try {
-    const data = await startInterview(req.body.typeId, req.body.language)
+    const profile = await getInterviewBrief(req.user.id)
+    const data = await startInterview(req.body.typeId, req.body.language, profile)
     res.status(201).json(data)
   } catch (err) {
     next(err)

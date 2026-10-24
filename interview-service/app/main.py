@@ -6,6 +6,7 @@ never calls this directly — the Node backend (gateway) does.
 from fastapi import FastAPI
 
 from app.api.interview import router as interview_router
+from app.api.profile import router as profile_router
 
 app = FastAPI(title="Vocalize Interview Service", version="0.1.0")
 
@@ -17,3 +18,4 @@ def health() -> dict:
 
 
 app.include_router(interview_router)
+app.include_router(profile_router)

@@ -5,6 +5,7 @@ import Register from './pages/Register'
 import Onboarding from './pages/Onboarding'
 import AppHome from './pages/AppHome'
 import Practice from './pages/Practice'
+import Interview from './pages/Interview'
 import Dashboard from './pages/Dashboard'
 import CursorTrail from './components/ui/CursorTrail'
 import RequireAuth from './components/auth/RequireAuth'
@@ -40,6 +41,14 @@ export default function App() {
             element={
               <RequireAuth>
                 <Practice />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/app/interview"
+            element={
+              <RequireAuth>
+                <Interview />
               </RequireAuth>
             }
           />

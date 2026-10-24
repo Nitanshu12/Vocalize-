@@ -1,56 +1,27 @@
-import { env } from '../config/env.js'
+import { callPythonService } from './pythonClient.js'
 import { pool } from '../../../Database/postgres.js'
 import { levelFromPoints } from './gamification.service.js'
 import { updateGamification } from './practice.service.js'
 
-// Thin client for the Python interview-service. Every call adds the shared
-// internal key so the Python side knows the request came from this gateway.
-// Errors are normalised: 400/404 pass through, everything else (incl. the
-// service being down) becomes a 502 so the client sees a clean "upstream" error.
-async function callInterviewService(path, { method = 'GET', body } = {}) {
-  let res
-  try {
-    res = await fetch(`${env.INTERVIEW_SERVICE_URL}${path}`, {
-      method,
-      headers: {
-        'content-type': 'application/json',
-        ...(env.INTERNAL_API_KEY ? { 'X-Internal-Key': env.INTERNAL_API_KEY } : {}),
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    })
-  } catch {
-    const err = new Error('Interview service is unavailable')
-    err.status = 502
-    throw err
-  }
-
-  if (!res.ok) {
-    let detail = ''
-    try {
-      detail = (await res.json())?.detail ?? ''
-    } catch {
-      // non-JSON error body — ignore
-    }
-    const err = new Error(detail || `Interview service error (${res.status})`)
-    err.status = res.status === 400 || res.status === 404 ? res.status : 502
-    throw err
-  }
-  return res.json()
+// Rounds on offer for this user's track — a school user never sees an HR
+// screening round, a graduate never sees the children's one.
+export function getInterviewTypes(track) {
+  const query = track ? `?track=${encodeURIComponent(track)}` : ''
+  return callPythonService(`/interview/types${query}`)
 }
 
-export function getInterviewTypes() {
-  return callInterviewService('/interview/types')
-}
-
-export function startInterview(typeId, language) {
-  return callInterviewService('/interview/start', {
+// The candidate brief travels with the start call. It is read from OUR
+// database rather than accepted from the browser, so a client cannot inject a
+// fake background to fish for particular questions.
+export function startInterview(typeId, language, profile = null) {
+  return callPythonService('/interview/start', {
     method: 'POST',
-    body: { typeId, language },
+    body: { typeId, language, profile },
   })
 }
 
 export function submitAnswer(threadId, answer) {
-  return callInterviewService('/interview/answer', {
+  return callPythonService('/interview/answer', {
     method: 'POST',
     body: { threadId, answer },
   })

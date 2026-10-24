@@ -7,6 +7,8 @@ import { env } from './config/env.js'
 import authRoutes from './routes/auth.routes.js'
 import ttsRoutes from './routes/tts.routes.js'
 import practiceRoutes from './routes/practice.routes.js'
+import interviewRoutes from './routes/interview.routes.js'
+import profileRoutes from './routes/profile.routes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 export const app = express()
@@ -21,6 +23,8 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }))
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/tts', ttsRoutes)
 app.use('/api/v1/practice', practiceRoutes)
+app.use('/api/v1/interview', interviewRoutes)
+app.use('/api/v1/profile', profileRoutes)
 
 app.use((req, res) => {
   res.status(404).json({ error: 'NotFound', message: 'Route not found' })

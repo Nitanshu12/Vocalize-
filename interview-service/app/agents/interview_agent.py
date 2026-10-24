@@ -1,23 +1,3 @@
-"""
-The LangGraph interview agent — wires the nodes into a stateful, resumable graph.
-
-    START -> ask -> (interrupt: wait for the user's answer) -> evaluate -> route
-                     ^________________ route == "ask" _________________|
-                                            route == "feedback"
-                                                  v
-                                             feedback -> END
-
-Two things make it feel like a real, multi-turn interview:
-
-  * interrupt_after=["ask"]  -> after asking, the graph PAUSES and checkpoints,
-    handing the question back to the caller. It resumes only once we feed in the
-    user's answer. This is LangGraph's human-in-the-loop pattern.
-
-  * MemorySaver checkpointer -> persists each interview's state by thread_id, so
-    every turn resumes exactly where the last one paused. (Swap for a Postgres
-    checkpointer later without touching the nodes.)
-"""
-
 from __future__ import annotations
 
 from langgraph.checkpoint.memory import MemorySaver
