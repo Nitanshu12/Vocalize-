@@ -1,80 +1,132 @@
+/* Hallmark · shape: session-as-blocks · genre: atmospheric · theme: custom · redesign: full · job: sign up · idea: "a speaking session drawn as colour blocks, with the coach's markup inside the biggest one" · vibe: "warm dark studio, heavy type, quiet confidence"
+ * paper: oklch(17.5% 0.012 50) · accent: oklch(85% 0.058 102) · display: Rethink Sans · body: Hanken Grotesk · hero: three heavy lines left, palette mosaic of the session right · nav: edge-aligned wordmark, three anchors, two actions · footer: wordmark mast over two link columns · imagery: the product (marked transcript, week, waveform) · signature: the marked-up transcript living in the hero mosaic
+ * axes: dark/grotesk-heavy/warm · posture: user-stated palette (Realtime Colors reference) · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P2 H2 E2 S2 R1 V2 · weakest: R, motion budget raised on the user's request (loader, pinned story, reveals); every piece has a reduced-motion path */
+/* Hallmark · waive 28b · each video is your camera live while recording, or the replay under Watch yourself back · a recording of yourself has no poster frame to show */
+/* Hallmark · waive 39b · the 110px controls are the pinned story's step list (a title and a paragraph each) · they are list rows, not buttons in a row */
+@import "./tokens.css";
+@import "./base.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Caveat:wght@500;600&display=swap');
-
-* {
-  box-sizing: border-box;
-  scroll-behavior: smooth;
+@layer base {
+  html { scroll-behavior: smooth; }
+  #root { width: 100%; min-height: 100vh; }
+  h1, h2, h3 { letter-spacing: var(--tracking-display); }
+  button:not(:disabled), [role='button'] { cursor: pointer; }
+  input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
 }
 
-html, body {
-  margin: 0;
-  overflow-x: hidden;
+@layer components {
+  .shell { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
+
+  /* Buttons: rectangles with soft corners, like the reference's blocks. */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs);
+    min-height: 3rem; padding: var(--space-sm) var(--space-lg); white-space: nowrap; border-radius: var(--radius-control);
+    font-family: var(--font-body); font-weight: 600; font-size: var(--text-md); line-height: 1.2;
+    border: 1px solid transparent; text-decoration: none;
+    transition: background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+  }
+  .btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+  .btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; transition: none; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-lg { min-height: 3.25rem; padding: var(--space-sm) var(--space-lg); font-size: 1.0625rem; }
+  .btn-sm { min-height: 2.5rem; padding: var(--space-xs) var(--space-md); font-size: var(--text-sm); }
+
+  .btn-primary { background: var(--color-accent); color: var(--color-accent-ink); }
+  .btn-primary:hover:not(:disabled) { background: var(--color-accent-2); }
+  .btn-secondary { background: var(--color-paper-3); color: var(--color-ink); }
+  .btn-secondary:hover:not(:disabled) { background: var(--color-olive); }
+  .btn-ghost { background: transparent; color: var(--color-ink); border-color: var(--color-rule); }
+  .btn-ghost:hover:not(:disabled) { border-color: var(--color-muted); background: var(--color-paper-2); }
+  .btn-danger { background: var(--color-error); color: var(--color-accent-ink); }
+  .btn-danger:hover:not(:disabled) { background: color-mix(in oklab, var(--color-error) 85%, var(--color-ink)); }
+
+  .btn .btn-arrow { transition: transform var(--dur-short) var(--ease-out); }
+  .btn:hover .btn-arrow { transform: translateX(3px); }
+
+  /* Plain text link with an underline that grows on hover. */
+  .link-quiet { color: var(--color-ink-2); text-decoration: none; transition: color var(--dur-short) var(--ease-out); }
+  .link-quiet:hover { color: var(--color-ink); text-decoration: underline; }
+
+  /* A panel is the one surface level in the app; nothing nests a panel inside a panel. */
+  .panel { background: var(--color-paper-2); color: var(--color-ink); border-radius: var(--radius-card); }
+
+  /* Selectable option: a block that fills khaki-edged when chosen. */
+  .option {
+    text-align: left; border-radius: var(--radius-card); border: 1px solid var(--color-rule);
+    background: var(--color-paper-2); color: var(--color-ink);
+    transition: border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+  }
+  .option:hover { border-color: var(--color-muted); }
+  .option:active { transform: scale(0.995); }
+  .option[aria-pressed='true'] { border-color: var(--color-accent); background: var(--color-paper-3); }
+  .option:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; transition: none; }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: var(--space-xs); min-height: 2.5rem; padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-control); border: 1px solid var(--color-rule); background: transparent;
+    color: var(--color-ink-2); font-size: var(--text-sm); font-weight: 500;
+    transition: border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
+  }
+  .chip:hover { border-color: var(--color-muted); color: var(--color-ink); }
+  .chip[aria-pressed='true'] { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-accent-ink); }
+  .chip:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; transition: none; }
+
+  .field {
+    width: 100%; padding: var(--space-sm) var(--space-md); border-radius: var(--radius-control);
+    background: var(--color-paper-2); color: var(--color-ink); border: 1px solid var(--color-muted);
+    transition: border-color var(--dur-short) var(--ease-out);
+  }
+  .field::placeholder { color: var(--color-muted); }
+  .field:hover { border-color: var(--color-ink-2); }
+  .field:focus { border-color: var(--color-accent); outline: none; }
+  .field:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+  .field[aria-invalid='true'] { border-color: var(--color-error); }
+
+  .notice { font-size: var(--text-sm); border-radius: var(--radius-control); padding: var(--space-sm) var(--space-md); border: 1px solid; }
+  .notice-error { color: var(--color-error); border-color: color-mix(in oklab, var(--color-error) 35%, transparent); background: color-mix(in oklab, var(--color-error) 10%, transparent); }
+  .notice-warn { color: var(--color-warn); border-color: color-mix(in oklab, var(--color-warn) 35%, transparent); background: color-mix(in oklab, var(--color-warn) 10%, transparent); }
+
+  .display-xl { font-family: var(--font-display); font-weight: 700; font-size: var(--text-display); line-height: 0.98; letter-spacing: -0.045em; }
+  .display-section { font-family: var(--font-display); font-weight: 700; font-size: var(--text-section); line-height: 1.02; letter-spacing: -0.04em; }
+  .lead { font-size: var(--text-lead); line-height: 1.5; color: var(--color-ink-2); }
 }
 
-body {
-  font-family: 'Inter', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  background: #f1f6f5;
-  color: #0f2a2e;
-}
-
-#root {
-  width: 100%;
-  min-height: 100vh;
-}
-
-/* ── Grain texture overlay ── */
-.grain::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.5;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.05'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* ── Hand-drawn underline for headline words ── */
-.coach-underline {
-  position: relative;
-  white-space: nowrap;
-}
-.coach-underline svg {
-  position: absolute;
-  left: 0;
-  bottom: -0.12em;
-  width: 100%;
-  height: 0.28em;
-  overflow: visible;
-}
-
-/* ── Handwritten annotation font ── */
-.handnote {
-  font-family: 'Caveat', cursive;
-}
-
-/* ── Waveform bars ── */
+/* Waveform bars: the brand mark breathing. */
 @keyframes wave {
   0%, 100% { transform: scaleY(0.35); }
-  50%      { transform: scaleY(1); }
+  50% { transform: scaleY(1); }
 }
-.wavebar {
-  transform-origin: center;
-  animation: wave 1.6s ease-in-out infinite;
+.wavebar { transform-origin: center; transform-box: fill-box; animation: wave 1.6s ease-in-out infinite; }
+
+@keyframes scrollHint {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(8px); opacity: 0.2; }
 }
+
+/* Lenis smooth scrolling (landing page only) */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: clip; }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-up { animation: fadeInUp 0.7s ease forwards; }
+.animate-fade-up { animation: fadeInUp 0.6s var(--ease-out) both; }
 
-/* ── Custom sound-particle cursor (desktop, motion-safe only) ── */
-@media (pointer: fine) {
+/* Custom sound-particle cursor (desktop, motion-safe only) */
+@media (pointer: fine) and (prefers-reduced-motion: no-preference) {
   html.vocalize-cursor-active,
-  html.vocalize-cursor-active * {
-    cursor: none;
-  }
+  html.vocalize-cursor-active * { cursor: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wavebar, .animate-fade-up { animation: none; }
+  html { scroll-behavior: auto; }
 }

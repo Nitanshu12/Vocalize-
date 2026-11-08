@@ -66,8 +66,8 @@ function ProgressBar({ value }) {
   return (
     <div className="fixed top-0 inset-x-0 z-50 h-1.5 bg-ink/5">
       <div
-        className="h-full bg-brand-600 transition-[width] duration-700 ease-out"
-        style={{ width: `${value}%` }}
+        className="h-full bg-brand-600 origin-left transition-transform duration-700 ease-out"
+        style={{ transform: `scaleX(${value / 100})` }}
       />
     </div>
   )
@@ -79,11 +79,8 @@ function OptionChip({ option, selected, onSelect }) {
     <button
       type="button"
       onClick={onSelect}
-      className={`group w-full text-left rounded-2xl border px-6 py-5 transition-all ${
-        selected
-          ? 'border-brand-600 bg-brand-50 shadow-[0_2px_20px_rgba(14,124,134,0.18)]'
-          : 'border-ink/15 bg-white hover:border-ink/40 hover:shadow-[0_2px_20px_rgba(28,25,23,0.06)]'
-      }`}
+      aria-pressed={selected}
+      className="option w-full px-6 py-5"
     >
       <span className="block font-display text-xl font-semibold text-ink">{option.label}</span>
       <span className="block text-sm text-ink-soft mt-1">{option.hint}</span>
@@ -155,7 +152,7 @@ export default function Onboarding() {
       await completeOnboarding(answers)
       navigate('/app')
     } catch (err) {
-      setSubmitError(err.message || 'Something went wrong — please try again.')
+      setSubmitError(err.message || 'Something went wrong, please try again.')
       setSubmitting(false)
     }
   }
@@ -164,12 +161,10 @@ export default function Onboarding() {
   const progress = (step / (QUESTIONS.length + 1)) * 100
 
   return (
-    <div className="relative min-h-screen bg-paper grain overflow-hidden flex items-center justify-center px-6">
+    <div className="relative min-h-screen bg-paper overflow-hidden flex items-center justify-center px-6">
       <ProgressBar value={progress} />
 
       {/* soft ambient glow, same motif as the hero */}
-      <div className="absolute -top-40 -left-40 w-[520px] h-[520px] bg-brand-100/50 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -right-32 w-[420px] h-[420px] bg-gold/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative w-full max-w-lg">
         {/* -------------------------------- WELCOME -------------------------------- */}
@@ -181,12 +176,10 @@ export default function Onboarding() {
                   speaking ? 'scale-100 animate-pulse' : 'scale-90'
                 }`}
               />
-              <span className="absolute inset-4 rounded-full bg-white shadow-[0_8px_40px_rgba(14,124,134,0.2)]" />
-              <WaveMark className="relative w-20 h-14" animate={speaking} />
+              <span className="absolute inset-4 rounded-full bg-surface" />
+              <WaveMark className="relative w-20 h-14 text-accent" animate={speaking} />
             </div>
-
-            <p className="handnote text-2xl text-brand-700 mb-3">a quick hello before we start</p>
-            <h1 className="font-display text-4xl lg:text-5xl font-semibold text-ink tracking-tight leading-[1.1] mb-5">
+            <h1 className="font-display text-4xl lg:text-5xl font-bold text-ink tracking-[-0.04em] leading-[1.05] mb-5">
               Hello, {firstName}.
             </h1>
             <p className="text-lg text-ink-soft leading-relaxed mb-10 max-w-md mx-auto">
@@ -208,7 +201,7 @@ export default function Onboarding() {
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-ink text-paper font-semibold text-lg hover:gap-3.5 transition-all"
+                className="btn btn-primary btn-lg"
               >
                 Let's begin <ArrowRight size={19} />
               </button>
@@ -221,10 +214,10 @@ export default function Onboarding() {
           const q = QUESTIONS[step - 1]
           return (
             <div key={q.key} className="animate-fade-up">
-              <p className="handnote text-xl text-brand-700 mb-2">
+              <p className="text-sm text-ink-faint mb-3">
                 Question {step} of {QUESTIONS.length}
               </p>
-              <h2 className="font-display text-3xl lg:text-4xl font-semibold text-ink tracking-tight leading-[1.12] mb-8">
+              <h2 className="font-display text-3xl lg:text-4xl font-bold text-ink tracking-[-0.04em] leading-[1.05] mb-8">
                 {q.prompt}
               </h2>
               <div className="space-y-3">
@@ -246,9 +239,8 @@ export default function Onboarding() {
           const rec = getRecommendation(answers, firstName)
           return (
             <div key="recommendation" className="text-center animate-fade-up">
-              <WaveMark className="w-16 h-11 mx-auto mb-8" animate />
-              <p className="handnote text-2xl text-brand-700 mb-3">here's where we'll start</p>
-              <h2 className="font-display text-4xl lg:text-5xl font-semibold text-ink tracking-tight leading-[1.1] mb-6">
+              <WaveMark className="w-16 h-11 mx-auto mb-8 text-accent" animate />
+              <h2 className="font-display text-4xl lg:text-5xl font-bold text-ink tracking-[-0.04em] leading-[1.05] mb-6">
                 {rec.track}
               </h2>
               <p className="text-lg text-ink-soft leading-relaxed mb-10 max-w-md mx-auto">
@@ -265,7 +257,7 @@ export default function Onboarding() {
                 type="button"
                 onClick={finish}
                 disabled={submitting}
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-ink text-paper font-semibold text-lg hover:gap-3.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="btn btn-primary btn-lg"
               >
                 {submitting ? 'Setting up…' : 'Enter Vocalize'}
                 {!submitting && <ArrowRight size={19} />}

@@ -1,131 +1,226 @@
 import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { WaveMark } from '../ui/Waveform'
+import { motion } from 'motion/react'
 
-/* Hand-drawn underline stroke (slightly wobbly on purpose) */
-function CoachUnderline({ children }) {
+const EASE = [0.16, 1, 0.3, 1]
+const HEAD = ['The interview', 'happens', 'out loud.']
+
+/* Five live bars in the khaki block: a voice level, breathing. */
+function LevelBars({ count = 9 }) {
+  const heights = [40, 72, 100, 58, 86, 44, 92, 64, 36, 78, 52]
   return (
-    <span className="coach-underline">
-      {children}
-      <svg viewBox="0 0 200 12" preserveAspectRatio="none">
-        <path
-          d="M3 8 C 40 3, 80 10, 120 6 S 185 4, 197 7"
-          fill="none"
-          stroke="#0e7c86"
-          strokeWidth="4"
-          strokeLinecap="round"
+    <div className="flex items-center gap-[6px] h-full" aria-hidden="true">
+      {heights.slice(0, count).map((h, i) => (
+        <span
+          key={i}
+          className="wavebar block w-[7px] rounded-sm bg-accent-ink/85"
+          style={{ height: `${h}%`, animationDelay: `${i * 0.13}s` }}
         />
-      </svg>
-    </span>
-  )
-}
-
-/* The signature visual: a transcript marked up like a coach took a red pen to it */
-function MarkedTranscript() {
-  return (
-    <div className="relative bg-white rounded-2xl border border-ink/10 shadow-[0_2px_24px_rgba(28,25,23,0.08)] p-7 max-w-md rotate-[1.2deg]">
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-5 pb-4 border-b border-ink/10 border-dashed">
-        <div>
-          <p className="text-xs text-ink-faint font-medium uppercase tracking-wider">Your answer</p>
-          <p className="text-sm font-semibold text-ink mt-0.5">"Tell me about yourself" · 1:42</p>
-        </div>
-        <WaveMark className="w-8 h-6" animate />
-      </div>
-
-      {/* Transcript with coach markup */}
-      <p className="text-[15px] leading-[2.1] text-ink-soft">
-        So{' '}
-        <span className="relative inline-block px-1.5 border-2 border-coral rounded-full text-coral font-medium">
-          basically
-          <span className="handnote absolute -top-6 left-1/2 -translate-x-1/2 text-coral text-base whitespace-nowrap">
-            3rd time ↓
-          </span>
-        </span>{' '}
-        I'm a final year student and{' '}
-        <span className="relative border-b-[3px] border-gold/70" style={{ borderBottomStyle: 'wavy' }}>
-          I-did-my-schooling-from-Bhopal-then-I…
-          <span className="handnote absolute -bottom-7 right-0 text-gold text-base whitespace-nowrap">
-            breathe — slow down
-          </span>
-        </span>
-      </p>
-
-      <p className="text-[15px] leading-[2.1] text-ink-soft mt-6">
-        …what I really care about is building things people{' '}
-        <span className="relative font-medium text-ink">
-          actually use.
-          <span className="handnote absolute -bottom-7 right-0 text-leaf text-base whitespace-nowrap">
-            strong close ✓
-          </span>
-        </span>
-      </p>
-
-      {/* The one thing */}
-      <div className="mt-9 bg-brand-50 rounded-xl px-4 py-3.5 border-l-4 border-brand-600">
-        <p className="text-xs font-semibold text-brand-700 uppercase tracking-wider mb-1">The one thing</p>
-        <p className="text-sm text-ink leading-relaxed">
-          Swap "basically" for a half-second pause. That's it. Next session, just that.
-        </p>
-      </div>
-
-      {/* Taped corner effect */}
-      <div className="absolute -top-3 left-10 w-16 h-6 bg-brand-100/70 rotate-[-4deg] rounded-sm" />
+      ))}
     </div>
   )
 }
 
-export default function Hero() {
+/* The signature: a spoken answer, marked up by a coach as you watch. */
+function MarkedTranscript({ ready }) {
+  const at = (s) => ({ duration: 0.6, delay: ready ? s : 0, ease: EASE })
+  const show = ready ? 'show' : 'hidden'
+  const note = {
+    hidden: { opacity: 0, y: 6 },
+    show: { opacity: 1, y: 0 },
+  }
   return (
-    <section className="relative grain overflow-hidden bg-paper pt-16">
-      <div className="absolute -top-32 -left-40 w-[520px] h-[520px] bg-brand-100/60 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-40 -right-32 w-[380px] h-[380px] bg-gold/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="relative max-w-6xl mx-auto px-6">
-        <div className="grid lg:grid-cols-[1.1fr_1fr] gap-16 items-center py-24 lg:py-32">
+    <div className="relative h-full flex flex-col justify-between p-6 lg:p-7">
+      <p className="text-[15px] lg:text-base leading-[2.15] text-ink-soft">
+        So{' '}
+        <span className="relative inline-block px-1 text-coral font-semibold">
+          basically
+          <svg className="absolute -inset-x-1.5 -inset-y-1 w-[calc(100%+12px)] h-[calc(100%+8px)] overflow-visible" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
+            <motion.ellipse
+              cx="50" cy="20" rx="48" ry="17"
+              fill="none" strokeWidth="2.5" className="stroke-coral"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: ready ? 1 : 0 }}
+              transition={at(1.15)}
+            />
+          </svg>
+          <motion.span
+            className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-semibold text-coral whitespace-nowrap"
+            variants={note} initial="hidden" animate={show} transition={at(1.5)}
+          >
+            third time
+          </motion.span>
+        </span>{' '}
+        I’m a final year student and{' '}
+        <span className="relative">
+          <span className="underline decoration-wavy decoration-gold/80 decoration-2 underline-offset-[6px]">
+            I-did-my-schooling-from-Bhopal-then-I…
+          </span>
+          <motion.span
+            className="absolute -bottom-7 right-0 text-xs font-semibold text-gold whitespace-nowrap"
+            variants={note} initial="hidden" animate={show} transition={at(1.8)}
+          >
+            breathe, slow down
+          </motion.span>
+        </span>
+      </p>
 
-          {/* Left — editorial text */}
-          <div className="animate-fade-up">
-            <p className="text-sm font-semibold text-brand-700 mb-6 flex items-center gap-2">
-              <WaveMark className="w-6 h-4" animate />
-              The only platform that truly listens to you.
+      <p className="text-[15px] lg:text-base leading-[2.15] text-ink-soft">
+        …what I really care about is building things people{' '}
+        <span className="relative font-semibold text-ink">
+          actually use.
+          <motion.span
+            className="absolute -bottom-7 right-0 text-xs font-semibold text-leaf whitespace-nowrap"
+            variants={note} initial="hidden" animate={show} transition={at(2.1)}
+          >
+            strong close
+          </motion.span>
+        </span>
+      </p>
+    </div>
+  )
+}
+
+function Block({ area, className = '', ready, i, children }) {
+  return (
+    <motion.div
+      className={`rounded-card overflow-hidden ${className}`}
+      style={{ gridArea: area }}
+      initial={{ opacity: 0, scale: 0.94 }}
+      animate={ready ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.94 }}
+      transition={{ duration: 0.8, delay: 0.25 + i * 0.08, ease: EASE }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+function SessionMosaic({ ready }) {
+  return (
+    <div
+      className="hidden lg:grid w-full h-[560px] gap-2.5"
+      style={{
+        gridTemplateColumns: 'repeat(12, minmax(0, 1fr))',
+        gridTemplateRows: '64px repeat(3, minmax(0, 1fr)) 120px',
+        gridTemplateAreas: `
+          "q q q q q q . . w w w w"
+          "t t t t t t t t w w w w"
+          "t t t t t t t t s s s s"
+          "t t t t t t t t s s s s"
+          "m m o o o o o o o o o o"`,
+      }}
+    >
+      <Block area="q" i={0} ready={ready} className="bg-surface flex items-center justify-between px-5">
+        <span className="text-sm text-ink-soft">“Tell me about yourself”</span>
+        <span className="font-display font-semibold text-ink tabular-nums">1:42</span>
+      </Block>
+      <Block area="w" i={1} ready={ready} className="bg-accent p-5 flex flex-col justify-between">
+        <span className="text-sm font-semibold text-accent-ink">Listening</span>
+        <div className="h-20"><LevelBars count={11} /></div>
+      </Block>
+      <Block area="t" i={2} ready={ready} className="bg-paper-deep">
+        <MarkedTranscript ready={ready} />
+      </Block>
+      <Block area="s" i={3} ready={ready} className="bg-accent-soft p-5 flex flex-col justify-end">
+        <p className="font-display text-2xl font-bold leading-tight text-accent-ink tracking-[-0.03em]">STAR structure: complete</p>
+        <p className="text-sm text-accent-ink/75 mt-2">situation, task, action, result</p>
+      </Block>
+      <Block area="m" i={4} ready={ready} className="bg-olive" />
+      <Block area="o" i={5} ready={ready} className="bg-ink p-5 flex flex-col justify-center">
+        <p className="text-sm font-semibold text-accent-ink/70 mb-1">The one thing</p>
+        <p className="text-accent-ink font-medium leading-snug">
+          Swap “basically” for a half-second pause. Next session, just that.
+        </p>
+      </Block>
+    </div>
+  )
+}
+
+/* Phone and tablet: the transcript and the one thing, stacked. */
+function SessionStack({ ready }) {
+  return (
+    <motion.div
+      className="lg:hidden grid gap-2.5"
+      initial={{ opacity: 0, y: 16 }}
+      animate={ready ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.8, delay: 0.5, ease: EASE }}
+    >
+      <div className="rounded-card bg-paper-deep min-h-[260px]"><MarkedTranscript ready={ready} /></div>
+      <div className="rounded-card bg-ink p-5">
+        <p className="text-sm font-semibold text-accent-ink/70 mb-1">The one thing</p>
+        <p className="text-accent-ink font-medium leading-snug">Swap “basically” for a half-second pause.</p>
+      </div>
+    </motion.div>
+  )
+}
+
+export default function Hero({ ready = true }) {
+  return (
+    <section className="relative pt-[72px]">
+      <div className="shell min-h-[calc(100svh-72px)] grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] gap-12 lg:gap-16 items-center py-14 lg:py-10">
+        <div className="min-w-0">
+          <h1 className="display-xl text-ink">
+            {HEAD.map((line, i) => (
+              <span key={line} className="block overflow-hidden pb-[0.06em]">
+                <motion.span
+                  className="block"
+                  initial={{ y: '105%' }}
+                  animate={ready ? { y: 0 } : { y: '105%' }}
+                  transition={{ duration: 0.9, delay: 0.1 + i * 0.1, ease: EASE }}
+                >
+                  {line}
+                </motion.span>
+              </span>
+            ))}
+          </h1>
+
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={ready ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.5, ease: EASE }}
+          >
+            <p className="lead mt-8 max-w-[30rem]">
+              Vocalize listens while you practice, then names the one thing to fix.
             </p>
 
-            <h1 className="font-display text-5xl lg:text-[3.9rem] font-semibold text-ink leading-[1.08] tracking-tight mb-7">
-              You rehearse in your head.
-              <br />
-              The interview happens{' '}
-              <CoachUnderline>out loud.</CoachUnderline>
-            </h1>
-
-            <p className="text-lg text-ink-soft leading-relaxed mb-10 max-w-md">
-              Vocalize listens while you practice — interviews, presentations,
-              speeches — and tells you the <em className="font-display not-italic font-semibold text-ink">one thing</em> to
-              fix next time. Like a good coach would.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-4 mb-8">
-              <Link to="/register"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-ink text-paper font-semibold hover:bg-ink/85 transition-all hover:gap-3">
-                Start speaking <ArrowRight size={17} />
+            <div className="flex flex-wrap items-center gap-3 mt-10">
+              <Link to="/register" className="btn btn-primary btn-lg">
+                Start speaking <ArrowRight size={18} className="btn-arrow" />
               </Link>
-              <a href="#how-it-works"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border border-ink/20 text-ink font-semibold hover:border-ink/50 transition-colors">
+              <a href="#how-it-works" className="btn btn-secondary btn-lg">
                 How a session goes
               </a>
             </div>
 
-            <p className="handnote text-xl text-ink-faint">
-              No credit card. No judgement. Just you, out loud.
-            </p>
-          </div>
-
-          {/* Right — the coach's markup */}
-          <div className="relative flex justify-center lg:justify-end pt-8 lg:pt-0">
-            <MarkedTranscript />
-          </div>
-
+            <p className="text-sm text-ink-faint mt-6">No credit card. No judgement. Just you, out loud.</p>
+          </motion.div>
         </div>
+
+        <div className="min-w-0">
+          <SessionMosaic ready={ready} />
+          <SessionStack ready={ready} />
+        </div>
+      </div>
+
+      <div className="hidden lg:block absolute bottom-6 inset-x-0">
+      <div className="shell">
+      <motion.a
+        href="#modes"
+        className="inline-flex items-center gap-3 text-sm text-ink-soft rounded-sm"
+        initial={{ opacity: 0 }}
+        animate={ready ? { opacity: 1 } : {}}
+        transition={{ delay: 1.2, duration: 0.6 }}
+      >
+        <span className="relative w-5 h-8 rounded-full border-2 border-ink-soft" aria-hidden="true">
+          <motion.span
+            className="absolute left-1/2 top-1.5 -ml-[1.5px] w-[3px] h-2 rounded-full bg-ink-soft"
+            animate={{ y: [0, 8, 0], opacity: [1, 0.2, 1] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        </span>
+        Scroll to see the rooms
+      </motion.a>
+      </div>
       </div>
     </section>
   )

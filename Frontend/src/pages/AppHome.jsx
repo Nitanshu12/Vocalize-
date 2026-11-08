@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Mic, Sparkles, Flame, Gauge } from 'lucide-react'
+import { motion } from 'motion/react'
+import { ArrowRight, Sparkles, Flame, Gauge } from 'lucide-react'
+import { WaveMark } from '../components/ui/Waveform'
 import { useAuth } from '../context/AuthContext'
 
 /* The post-onboarding "launch pad". Its only job is to get a first-time user
@@ -16,7 +18,7 @@ const STEPS = [
   {
     n: 2,
     title: 'Speak it out',
-    body: 'Read it aloud — timed or relaxed, audio or on video.',
+    body: 'Read it aloud, timed or relaxed, audio or on video.',
   },
   {
     n: 3,
@@ -24,6 +26,8 @@ const STEPS = [
     body: 'Instant score, live pacing, and AI feedback on every attempt.',
   },
 ]
+
+const EASE = [0.16, 1, 0.3, 1]
 
 const TEASERS = [
   { icon: Gauge, label: 'Score out of 100' },
@@ -36,76 +40,66 @@ export default function AppHome() {
   const firstName = user?.name?.trim().split(/\s+/)[0] || 'there'
   const [activeStep, setActiveStep] = useState(0)
 
+  const tones = ['bg-accent text-accent-ink', 'bg-accent-soft text-accent-ink', 'bg-paper-deep text-ink']
+
   return (
-    <div className="relative min-h-screen bg-paper grain overflow-hidden flex items-center justify-center px-6 py-14">
-      {/* ambient teal glow, same motif as the hero */}
-      <div className="absolute -top-40 -left-40 w-[520px] h-[520px] bg-brand-100/50 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -right-32 w-[420px] h-[420px] bg-brand-200/30 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative w-full max-w-2xl text-center animate-fade-up">
-        {/* hero mark */}
-        <div className="relative mx-auto mb-9 w-28 h-28 flex items-center justify-center">
-          <span className="absolute inset-0 rounded-full bg-brand-100 animate-pulse" />
-          <span className="absolute inset-3 rounded-full bg-white shadow-[0_8px_40px_rgba(14,124,134,0.2)]" />
-          <Mic className="relative text-brand-700" size={40} strokeWidth={2} />
-        </div>
-
-        <p className="handnote text-2xl text-brand-700 mb-3">you're all set</p>
-        <h1 className="font-display text-4xl lg:text-5xl font-semibold text-ink tracking-tight leading-[1.1] mb-4">
-          Ready when you are, {firstName}.
-        </h1>
-        <p className="text-lg text-ink-soft leading-relaxed mb-10 max-w-md mx-auto">
-          Your coach is warmed up. Let's turn your first few words into your first score.
-        </p>
-
-        {/* interactive 3-step strip */}
-        <div className="grid sm:grid-cols-3 gap-3 mb-9 text-left">
-          {STEPS.map((step, i) => (
-            <button
-              key={step.n}
-              type="button"
-              onMouseEnter={() => setActiveStep(i)}
-              onFocus={() => setActiveStep(i)}
-              className={`rounded-2xl border px-5 py-5 transition-all duration-200 ${
-                activeStep === i
-                  ? 'border-brand-600 bg-white shadow-[0_2px_20px_rgba(14,124,134,0.12)] -translate-y-0.5'
-                  : 'border-ink/12 bg-white/60 hover:border-ink/30'
-              }`}
-            >
-              <span
-                className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-display font-semibold text-sm mb-3 transition-colors ${
-                  activeStep === i ? 'bg-brand-600 text-white' : 'bg-brand-50 text-brand-700'
-                }`}
-              >
-                {step.n}
-              </span>
-              <span className="block font-display text-lg font-semibold text-ink mb-1">
-                {step.title}
-              </span>
-              <span className="block text-sm text-ink-soft leading-snug">{step.body}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* primary CTA */}
-        <Link
-          to="/app/practice"
-          className="inline-flex items-center gap-2 px-9 py-4 rounded-full bg-ink text-paper font-semibold text-lg hover:gap-3.5 transition-all"
+    <div className="min-h-screen bg-paper flex items-center py-14">
+      <div className="shell grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-12 lg:gap-16 items-center">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: EASE }}
         >
-          Start your first session <ArrowRight size={20} />
-        </Link>
+          <WaveMark className="w-12 h-9 text-accent mb-10" animate />
+          <h1 className="font-display text-5xl lg:text-6xl font-bold text-ink tracking-[-0.045em] leading-[1.02] mb-6">
+            Ready when you are, {firstName}.
+          </h1>
+          <p className="lead max-w-md mb-10">
+            Your coach is warmed up. Let's turn your first few words into your first score.
+          </p>
 
-        {/* what you'll earn — teaser chips */}
-        <div className="flex items-center justify-center gap-2 flex-wrap mt-8">
-          {TEASERS.map(({ icon: Icon, label }) => (
-            <span
-              key={label}
-              className="inline-flex items-center gap-2 text-sm font-medium text-ink-soft bg-white border border-ink/10 rounded-full px-4 py-2"
-            >
-              <Icon size={15} className="text-brand-600" /> {label}
-            </span>
-          ))}
-        </div>
+          <Link to="/app/practice" className="btn btn-primary btn-lg">
+            Start your first session <ArrowRight size={20} className="btn-arrow" />
+          </Link>
+
+          <ul className="flex flex-wrap gap-x-6 gap-y-3 mt-10">
+            {TEASERS.map(({ icon: Icon, label }) => (
+              <li key={label} className="inline-flex items-center gap-2 text-ink-soft">
+                <Icon size={16} className="text-accent" /> {label}
+              </li>
+            ))}
+          </ul>
+        </motion.div>
+
+        <ol className="grid gap-2.5">
+          {STEPS.map((step, i) => {
+            const on = activeStep === i
+            return (
+              <motion.li
+                key={step.n}
+                initial={{ opacity: 0, x: 24 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7, delay: 0.15 + i * 0.08, ease: EASE }}
+              >
+                <button
+                  type="button"
+                  onMouseEnter={() => setActiveStep(i)}
+                  onFocus={() => setActiveStep(i)}
+                  aria-current={on ? 'step' : undefined}
+                  className={`w-full text-left rounded-card px-7 py-6 grid grid-cols-[3rem_minmax(0,1fr)] gap-4 items-baseline transition-[background-color,color,transform] duration-300 ease-out ${
+                    on ? `${tones[i]} lg:-translate-x-2` : 'bg-surface text-ink'
+                  }`}
+                >
+                  <span className="font-display text-4xl font-bold tracking-[-0.04em] leading-none tabular-nums">{step.n}</span>
+                  <span>
+                    <span className="block font-display text-2xl font-bold tracking-[-0.03em] mb-1">{step.title}</span>
+                    <span className={`block leading-snug ${on ? 'opacity-80' : 'text-ink-soft'}`}>{step.body}</span>
+                  </span>
+                </button>
+              </motion.li>
+            )
+          })}
+        </ol>
       </div>
     </div>
   )

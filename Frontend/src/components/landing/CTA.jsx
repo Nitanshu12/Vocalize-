@@ -1,34 +1,63 @@
+import { useLayoutEffect, useRef } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { WaveMark } from '../ui/Waveform'
-import Reveal from '../ui/Reveal'
 
+gsap.registerPlugin(ScrollTrigger)
+
+/* The last chapter: a khaki window that opens to fill the screen as you reach it. */
 export default function CTA() {
+  const root = useRef(null)
+  const panel = useRef(null)
+
+  useLayoutEffect(() => {
+    const mm = gsap.matchMedia()
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const ctx = gsap.context(() => {
+        gsap.fromTo(
+          panel.current,
+          { clipPath: 'inset(14% 10% 14% 10% round 28px)' },
+          {
+            clipPath: 'inset(0% 0% 0% 0% round 0px)',
+            ease: 'none',
+            scrollTrigger: { trigger: root.current, start: 'top 85%', end: 'top top', scrub: 0.6 },
+          }
+        )
+        gsap.from('[data-cta-line]', {
+          yPercent: 110,
+          stagger: 0.08,
+          ease: 'none',
+          scrollTrigger: { trigger: root.current, start: 'top 40%', end: 'top top', scrub: 0.6 },
+        })
+      }, root)
+      return () => ctx.revert()
+    })
+    return () => mm.revert()
+  }, [])
+
   return (
-    <section className="relative grain py-28 bg-ink overflow-hidden">
-      <Reveal className="relative max-w-3xl mx-auto px-6 text-center">
-
-        <WaveMark className="w-14 h-9 mx-auto mb-10" color="#2ba3ab" animate />
-
-        <h2 className="font-display text-4xl lg:text-[3.4rem] font-semibold text-paper tracking-tight leading-[1.12] mb-6">
-          Your next interview
-          <br />
-          shouldn't be your practice.
-        </h2>
-
-        <p className="text-lg text-paper/60 mb-11 leading-relaxed max-w-xl mx-auto">
-          Two minutes, out loud, today. That's how it starts.
-        </p>
-
-        <Link to="/register"
-          className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-paper text-ink font-semibold text-lg hover:gap-3.5 transition-all">
-          Start speaking — it's free <ArrowRight size={19} />
-        </Link>
-
-        <p className="handnote text-xl text-paper/40 mt-8">
-          no credit card, no trial timer, no catch
-        </p>
-      </Reveal>
+    <section id="start" ref={root} className="relative">
+      <div
+        ref={panel}
+        className="min-h-[100svh] bg-accent text-accent-ink flex items-center motion-reduce:rounded-card"
+        style={{ '--color-focus': 'var(--color-accent-ink)' }}
+      >
+        <div className="shell py-24">
+          <WaveMark className="w-16 h-12 mb-12 text-accent-ink" animate />
+          <h2 className="font-display font-bold tracking-[-0.05em] leading-[0.95] text-[clamp(2.75rem,6vw+0.5rem,7rem)] max-w-[14ch]">
+            <span className="block overflow-hidden pb-[0.06em]"><span data-cta-line className="block">Your next interview</span></span>
+            <span className="block overflow-hidden pb-[0.06em]"><span data-cta-line className="block">shouldn’t be your practice.</span></span>
+          </h2>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-6 mt-12">
+            <Link to="/register" className="btn btn-lg bg-accent-ink text-ink hover:bg-paper-deep self-start">
+              Start speaking, it’s free <ArrowRight size={18} className="btn-arrow" />
+            </Link>
+            <p className="text-accent-ink/75 max-w-sm">Two minutes, out loud, today. No credit card, no trial timer, no catch.</p>
+          </div>
+        </div>
+      </div>
     </section>
   )
 }

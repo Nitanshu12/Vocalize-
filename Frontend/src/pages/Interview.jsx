@@ -46,15 +46,7 @@ const LANG_LABEL = { en: 'English', hi: 'हिन्दी Hindi' }
 
 function Chip({ active, onClick, children }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full border text-sm font-medium transition-all ${
-        active
-          ? 'border-brand-600 bg-brand-50 text-brand-700'
-          : 'border-ink/15 bg-white text-ink-soft hover:border-ink/40'
-      }`}
-    >
+    <button type="button" onClick={onClick} aria-pressed={active} className="chip">
       {children}
     </button>
   )
@@ -182,7 +174,7 @@ export default function Interview() {
       setTurnNo(1)
       setStep('room')
     } catch (err) {
-      setError(err.message || 'Could not start the interview — please try again.')
+      setError(err.message || 'Could not start the interview, please try again.')
     } finally {
       setBusy(false)
     }
@@ -210,7 +202,7 @@ export default function Interview() {
       if (mode === 'video' && readyVideoRef.current) readyVideoRef.current.srcObject = stream
       startMeter(stream)
     } catch {
-      setMediaError('We need mic (and camera) access to run the interview — allow it and retry.')
+      setMediaError('We need mic (and camera) access to run the interview, allow it and retry.')
     }
   }
 
@@ -343,7 +335,7 @@ export default function Interview() {
         setTurnNo((n) => n + 1)
       }
     } catch (err) {
-      setError(err.message || 'Something went wrong — please try again.')
+      setError(err.message || 'Something went wrong, please try again.')
     } finally {
       setBusy(false)
     }
@@ -364,7 +356,7 @@ export default function Interview() {
       await speech.start(stream)
       if (autoRef.current) startVad(stream) // hands-free: auto-submit on silence
     } catch {
-      setError('We need mic access to hear you — allow it and try again, or type instead.')
+      setError('We need mic access to hear you, allow it and try again, or type instead.')
     }
   }
 
@@ -468,7 +460,7 @@ export default function Interview() {
     const text = (transcript || '').trim()
     if (!text) {
       finishingRef.current = false
-      setError("We couldn't catch that — try again, or type instead.")
+      setError("We couldn't catch that, try again, or type instead.")
       return
     }
     submitTurn(text)
@@ -565,20 +557,20 @@ export default function Interview() {
           ? 'Speaking…'
           : 'Your turn'
     return (
-      <div className="fixed inset-0 z-40 flex flex-col bg-[#08181b] text-white">
+      <div className="fixed inset-0 z-40 flex flex-col bg-paper text-ink">
         {/* top bar */}
         <div className="flex items-center justify-between px-5 py-3 text-sm shrink-0">
           <span className="inline-flex items-center gap-2 font-medium">
             <span className="w-2.5 h-2.5 rounded-full bg-coral animate-pulse" />
             {selectedType?.label}
           </span>
-          <span className="text-white/50">
+          <span className="text-ink/50">
             Question {turnNo} of ~{selectedType?.maxQuestions}
           </span>
         </div>
 
         {/* main stage */}
-        <div className="relative flex-1 min-h-0 mx-3 rounded-2xl overflow-hidden bg-gradient-to-b from-[#103038] to-[#08181b] grid place-items-center">
+        <div className="relative flex-1 min-h-0 mx-3 rounded-card overflow-hidden bg-paper-deep grid place-items-center">
           {/* interviewer presence */}
           <div className="flex flex-col items-center">
             <div className="relative w-40 h-40 grid place-items-center">
@@ -588,12 +580,12 @@ export default function Interview() {
               <span
                 className={`absolute inset-0 rounded-full bg-brand-600/20 ${recording || speaking ? 'animate-pulse' : ''}`}
               />
-              <span className="absolute inset-5 rounded-full bg-brand-600 grid place-items-center font-display text-5xl font-semibold text-white">
+              <span className="absolute inset-5 rounded-full bg-brand-600 grid place-items-center font-display text-5xl font-semibold text-ink">
                 {selectedType?.persona.name.charAt(0)}
               </span>
             </div>
             <p className="mt-5 text-lg font-semibold">{selectedType?.persona.name}</p>
-            <p className="text-sm text-white/50">{statusText}</p>
+            <p className="text-sm text-ink/50">{statusText}</p>
             {recording && silenceCountdown !== null && (
               <p className="mt-1 text-xs text-brand-200 tabular-nums">
                 Wrapping up in {silenceCountdown}…
@@ -604,13 +596,13 @@ export default function Interview() {
           {/* live captions (toggle with CC) — one rolling line, Meet-style */}
           {captionsOn && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[min(80%,640px)] flex justify-center">
-              <div className="rounded-lg bg-black/60 backdrop-blur px-4 py-2 text-[15px] leading-snug text-white/95 max-h-20 overflow-hidden">
+              <div className="rounded-lg bg-paper/95 px-4 py-2 text-[15px] leading-snug text-ink/95 max-h-20 overflow-hidden">
                 {recording ? (
                   <>
                     <span className="text-brand-200 font-semibold">You: </span>
-                    {speech.transcript} <span className="text-white/50 italic">{speech.interim}</span>
+                    {speech.transcript} <span className="text-ink/50 italic">{speech.interim}</span>
                     {!speech.transcript && !speech.interim && (
-                      <span className="text-white/50">Listening…</span>
+                      <span className="text-ink/50">Listening…</span>
                     )}
                   </>
                 ) : (
@@ -628,7 +620,7 @@ export default function Interview() {
           )}
 
           {/* self-view PiP, bottom-right (Meet-style) */}
-          <div className="absolute bottom-4 right-4 w-32 sm:w-44 aspect-video rounded-xl overflow-hidden bg-[#12303a] border border-white/10 grid place-items-center shadow-lg">
+          <div className="absolute bottom-4 right-4 w-32 sm:w-44 aspect-video rounded-xl overflow-hidden bg-surface border border-rule grid place-items-center">
             {mode === 'video' ? (
               <video
                 ref={selfVideoRef}
@@ -642,7 +634,7 @@ export default function Interview() {
                 {userInitial}
               </span>
             )}
-            <span className="absolute bottom-1 left-2 text-[11px] text-white/80">You</span>
+            <span className="absolute bottom-1 left-2 text-xs text-ink/80">You</span>
           </div>
         </div>
 
@@ -659,7 +651,7 @@ export default function Interview() {
               rows={2}
               autoFocus
               placeholder="Type your answer… (⌘/Ctrl + Enter to send)"
-              className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:border-brand-200 resize-none"
+              className="w-full rounded-xl border border-ink/15 bg-ink/5 px-4 py-3 text-ink placeholder:text-ink/40 focus:outline-none focus:border-brand-200 resize-none"
             />
           </div>
         )}
@@ -675,7 +667,7 @@ export default function Interview() {
             onClick={() => playQuestion(question)}
             disabled={busy || recording}
             title="Replay question"
-            className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center disabled:opacity-40 transition-colors"
+            className="w-12 h-12 rounded-full bg-ink/10 hover:bg-ink/20 grid place-items-center disabled:opacity-40 transition-colors"
           >
             <Volume2 size={19} />
           </button>
@@ -685,7 +677,7 @@ export default function Interview() {
             onClick={() => setCaptionsOn((v) => !v)}
             title={captionsOn ? 'Turn off captions' : 'Turn on captions'}
             className={`w-12 h-12 rounded-full grid place-items-center transition-colors ${
-              captionsOn ? 'bg-white/20 hover:bg-white/30' : 'bg-white/10 hover:bg-white/20'
+              captionsOn ? 'bg-ink/20 hover:bg-ink/30' : 'bg-ink/10 hover:bg-ink/20'
             }`}
           >
             {captionsOn ? <Captions size={19} /> : <CaptionsOff size={19} />}
@@ -700,7 +692,7 @@ export default function Interview() {
                 : 'Manual: tap to answer, tap to finish'
             }
             className={`w-12 h-12 rounded-full grid place-items-center transition-colors ${
-              autoMode ? 'bg-brand-600 hover:bg-brand-700' : 'bg-white/10 hover:bg-white/20'
+              autoMode ? 'bg-brand-600 hover:bg-brand-700' : 'bg-ink/10 hover:bg-ink/20'
             }`}
           >
             {autoMode ? <Zap size={19} /> : <Hand size={19} />}
@@ -711,7 +703,7 @@ export default function Interview() {
               type="button"
               onClick={() => submitTurn(answer)}
               disabled={busy || !answer.trim()}
-              className="inline-flex items-center gap-2 h-12 px-7 rounded-full bg-brand-600 hover:bg-brand-700 font-semibold disabled:opacity-50 transition-colors"
+              className="btn btn-primary"
             >
               <Send size={18} /> {busy ? 'Thinking…' : 'Send'}
             </button>
@@ -720,7 +712,7 @@ export default function Interview() {
               type="button"
               onClick={startAnswer}
               disabled={busy}
-              className="inline-flex items-center gap-2.5 h-12 px-8 rounded-full bg-brand-600 hover:bg-brand-700 font-semibold text-lg disabled:opacity-50 transition-colors"
+              className="btn btn-primary btn-lg"
             >
               <Mic size={20} /> {busy ? 'Thinking…' : 'Answer'}
             </button>
@@ -728,7 +720,7 @@ export default function Interview() {
             <button
               type="button"
               onClick={finishAnswer}
-              className="inline-flex items-center gap-2.5 h-12 px-8 rounded-full bg-white text-ink font-semibold text-lg hover:bg-white/90 transition-colors"
+              className="btn btn-primary btn-lg"
             >
               <Square size={17} fill="currentColor" /> Done
             </button>
@@ -739,7 +731,7 @@ export default function Interview() {
             onClick={() => setShowType((v) => !v)}
             disabled={recording}
             title={showType ? 'Use voice' : 'Type instead'}
-            className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center disabled:opacity-40 transition-colors"
+            className="w-12 h-12 rounded-full bg-ink/10 hover:bg-ink/20 grid place-items-center disabled:opacity-40 transition-colors"
           >
             {showType ? <Mic size={19} /> : <Keyboard size={19} />}
           </button>
@@ -759,8 +751,7 @@ export default function Interview() {
 
   /* -------------------------------- render -------------------------------- */
   return (
-    <div className="relative min-h-screen bg-paper grain overflow-hidden px-6 py-10">
-      <div className="absolute -top-40 -right-40 w-[480px] h-[480px] bg-brand-100/50 rounded-full blur-3xl pointer-events-none" />
+    <div className="relative min-h-screen bg-paper overflow-hidden px-6 py-10">
 
       <div className="relative max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-10">
@@ -770,14 +761,13 @@ export default function Interview() {
           >
             <ArrowLeft size={16} /> Dashboard
           </Link>
-          <WaveMark className="w-10 h-7" animate={step === 'room' && busy} />
+          <WaveMark className="w-10 h-7 text-accent" animate={step === 'room' && busy} />
         </div>
 
         {/* --------------------------------- SETUP --------------------------------- */}
         {step === 'setup' && (
           <div className="animate-fade-up">
-            <p className="handnote text-2xl text-brand-700 mb-2">let's get you interview-ready</p>
-            <h1 className="font-display text-4xl font-semibold text-ink tracking-tight leading-[1.1] mb-6">
+            <h1 className="font-display text-4xl font-bold text-ink tracking-[-0.04em] leading-[1.05] mb-6">
               Pick a round
             </h1>
 
@@ -786,13 +776,13 @@ export default function Interview() {
             <p className="text-sm font-semibold text-ink mb-2">Where are you right now?</p>
             <div className="flex flex-wrap gap-2 mb-7">
               <Chip active={track === 'school'} onClick={() => changeTrack('school')}>
-                🎒 In school
+                In school
               </Chip>
               <Chip active={track === 'college'} onClick={() => changeTrack('college')}>
-                🎓 In college
+                In college
               </Chip>
               <Chip active={track === 'professional'} onClick={() => changeTrack('professional')}>
-                💼 Working
+                Working
               </Chip>
             </div>
 
@@ -808,14 +798,10 @@ export default function Interview() {
                   key={t.id}
                   type="button"
                   onClick={() => setTypeId(t.id)}
-                  className={`text-left rounded-2xl border px-5 py-4 transition-all ${
-                    typeId === t.id
-                      ? 'border-brand-600 bg-brand-50 shadow-[0_2px_20px_rgba(14,124,134,0.18)]'
-                      : 'border-ink/15 bg-white hover:border-ink/40'
-                  }`}
+                  aria-pressed={typeId === t.id}
+                  className="option px-5 py-4"
                 >
-                  <span className="text-2xl">{t.emoji}</span>
-                  <p className="font-display text-lg font-semibold text-ink mt-1.5">{t.label}</p>
+                  <p className="font-display text-lg font-semibold text-ink">{t.label}</p>
                   <p className="text-sm text-ink-soft leading-snug">{t.description}</p>
                 </button>
               ))}
@@ -825,7 +811,7 @@ export default function Interview() {
               type="button"
               onClick={goBrief}
               disabled={!selectedType}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-ink text-paper font-semibold text-lg hover:gap-3.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="btn btn-primary btn-lg"
             >
               Continue <ArrowRight size={19} />
             </button>
@@ -835,14 +821,13 @@ export default function Interview() {
         {/* --------------------------------- BRIEF --------------------------------- */}
         {step === 'brief' && selectedType && (
           <div className="animate-fade-up">
-            <p className="handnote text-2xl text-brand-700 mb-2">meet your interviewer</p>
-            <h1 className="font-display text-4xl font-semibold text-ink tracking-tight leading-[1.1] mb-6">
+            <h1 className="font-display text-4xl font-bold text-ink tracking-[-0.04em] leading-[1.05] mb-6">
               {selectedType.label}
             </h1>
 
-            <div className="rounded-2xl border border-ink/10 bg-white px-6 py-5 mb-6">
+            <div className="rounded-card border border-ink/10 bg-surface px-6 py-5 mb-6">
               <div className="flex items-center gap-4 mb-4">
-                <span className="w-12 h-12 rounded-full bg-brand-600 text-white grid place-items-center font-display text-xl font-semibold">
+                <span className="w-12 h-12 rounded-full bg-brand-600 text-accent-ink grid place-items-center font-display text-xl font-semibold">
                   {selectedType.persona.name.charAt(0)}
                 </span>
                 <div>
@@ -852,7 +837,7 @@ export default function Interview() {
                   <p className="text-sm text-ink-soft">{selectedType.persona.title}</p>
                 </div>
               </div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint mb-2">
+              <p className="text-xs font-semibold text-ink-faint mb-2">
                 You'll be assessed on
               </p>
               <div className="flex flex-wrap gap-2 mb-4">
@@ -917,7 +902,7 @@ export default function Interview() {
               <button
                 type="button"
                 onClick={goReady}
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-brand-600 text-white font-semibold text-lg hover:opacity-90 transition-all"
+                className="btn btn-primary btn-lg"
               >
                 Start interview <ArrowRight size={19} />
               </button>
@@ -938,8 +923,7 @@ export default function Interview() {
         {/* --------------------------------- READY --------------------------------- */}
         {step === 'ready' && (
           <div className="animate-fade-up text-center">
-            <p className="handnote text-2xl text-brand-700 mb-2">let's check your setup</p>
-            <h1 className="font-display text-4xl font-semibold text-ink tracking-tight leading-[1.1] mb-6">
+            <h1 className="font-display text-4xl font-bold text-ink tracking-[-0.04em] leading-[1.05] mb-6">
               Ready when you are
             </h1>
 
@@ -949,10 +933,10 @@ export default function Interview() {
                 autoPlay
                 muted
                 playsInline
-                className="w-full max-h-72 object-cover rounded-3xl -scale-x-100 bg-ink/90 mb-5"
+                className="w-full max-h-72 object-cover rounded-card -scale-x-100 bg-ink/90 mb-5"
               />
             ) : (
-              <div className="w-24 h-24 mx-auto rounded-full bg-brand-600 grid place-items-center text-white mb-5">
+              <div className="w-24 h-24 mx-auto rounded-full bg-brand-600 grid place-items-center text-ink mb-5">
                 <Mic size={30} />
               </div>
             )}
@@ -961,8 +945,8 @@ export default function Interview() {
             <div className="max-w-xs mx-auto mb-2">
               <div className="h-2 rounded-full bg-paper-dark overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-brand-600 transition-[width] duration-75"
-                  style={{ width: `${Math.round(micLevel * 100)}%` }}
+                  className="h-full rounded-full bg-brand-600 origin-left transition-transform duration-75"
+                  style={{ transform: `scaleX(${Math.min(1, Math.max(0, micLevel))})` }}
                 />
               </div>
             </div>
@@ -970,7 +954,7 @@ export default function Interview() {
               {mediaError
                 ? ''
                 : mediaReady
-                  ? 'Say “hello” — your mic looks good ✓'
+                  ? 'Say “hello”. Your mic looks good.'
                   : 'Allow mic/camera access to continue…'}
             </p>
 
@@ -990,7 +974,7 @@ export default function Interview() {
                   <button
                     type="button"
                     onClick={acquireMedia}
-                    className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-ink text-paper font-semibold text-lg hover:gap-3.5 transition-all"
+                    className="btn btn-primary btn-lg"
                   >
                     <RotateCcw size={18} /> Retry access
                   </button>
@@ -999,7 +983,7 @@ export default function Interview() {
                     type="button"
                     onClick={beginCountdown}
                     disabled={!mediaReady}
-                    className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-brand-600 text-white font-semibold text-lg hover:gap-3.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="btn btn-primary btn-lg"
                   >
                     I'm ready <ArrowRight size={19} />
                   </button>
@@ -1024,8 +1008,8 @@ export default function Interview() {
         {step === 'report' && report && (
           <div className="animate-fade-up">
             <div className="text-center mb-8">
-              <p className="handnote text-2xl text-brand-700 mb-1">your scorecard</p>
-              <p className="font-display text-7xl font-semibold text-ink tracking-tight">
+              <p className="text-ink-soft mb-1">Your scorecard</p>
+              <p className="font-display text-7xl font-bold text-ink tracking-[-0.04em]">
                 {report.overallScore}
                 <span className="text-2xl text-ink-faint">/100</span>
               </p>
@@ -1035,8 +1019,8 @@ export default function Interview() {
                   <span className="text-sm font-semibold text-brand-700 bg-brand-50 border border-brand-200 rounded-full px-4 py-1.5">
                     +{gami.pointsEarned} XP
                   </span>
-                  <span className="text-sm font-semibold text-ink-soft bg-white border border-ink/10 rounded-full px-4 py-1.5">
-                    Level {gami.level.level} · {gami.level.title}
+                  <span className="text-sm font-semibold text-ink-soft bg-surface border border-ink/10 rounded-full px-4 py-1.5">
+                    Level {gami.level.level}: {gami.level.title}
                   </span>
                   {typeof gami.current_streak === 'number' && (
                     <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-gold bg-gold/10 border border-gold/20 rounded-full px-4 py-1.5">
@@ -1048,8 +1032,8 @@ export default function Interview() {
             </div>
 
             {/* competency bars */}
-            <div className="rounded-3xl border border-ink/10 bg-white px-6 py-5 mb-6">
-              <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint mb-3">
+            <div className="rounded-card border border-ink/10 bg-surface px-6 py-5 mb-6">
+              <p className="text-xs font-semibold text-ink-faint mb-3">
                 Competencies
               </p>
               <div className="space-y-3">
@@ -1072,9 +1056,9 @@ export default function Interview() {
 
             {/* AI coach */}
             {report.coach && (
-              <div className="rounded-3xl border border-brand-200 bg-white px-7 py-6 mb-8">
-                <p className="inline-flex items-center gap-2 handnote text-2xl text-brand-700 mb-3">
-                  <Sparkles size={18} /> your coach says
+              <div className="rounded-card border border-brand-200 bg-surface px-7 py-6 mb-8">
+                <p className="inline-flex items-center gap-2 font-semibold text-accent mb-3">
+                  <Sparkles size={18} /> Your coach says
                 </p>
                 <p className="font-display text-xl font-semibold text-ink mb-4">
                   {report.coach.headline}
@@ -1093,8 +1077,8 @@ export default function Interview() {
                     </p>
                   ))}
                 </div>
-                <div className="rounded-xl bg-brand-50 border border-brand-100 px-4 py-3">
-                  <p className="text-sm text-brand-800">
+                <div className="border-l-2 border-accent pl-4 py-1">
+                  <p className="text-sm text-ink">
                     <span className="font-semibold">Practise next:</span> {report.coach.next_tip}
                   </p>
                 </div>
@@ -1105,13 +1089,13 @@ export default function Interview() {
               <button
                 type="button"
                 onClick={restart}
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-ink text-paper font-semibold hover:gap-3 transition-all"
+                className="btn btn-primary"
               >
                 <RotateCcw size={16} /> New interview
               </button>
               <Link
                 to="/app/dashboard"
-                className="inline-flex items-center px-7 py-3.5 rounded-full border border-ink/20 text-ink font-semibold hover:border-ink/50 transition-colors"
+                className="btn btn-ghost"
               >
                 Dashboard
               </Link>

@@ -1,57 +1,56 @@
-import { WaveDivider } from '../ui/Waveform'
+import { motion } from 'motion/react'
 import Reveal from '../ui/Reveal'
+import { staggerParent, staggerChild } from '../ui/motion'
 
 const rows = [
-  { flag: 'caught', color: 'text-coral', border: 'border-coral/30', text: '"basically" — 5 times in 90 seconds', sub: 'timestamps: 0:07, 0:23, 0:41, 1:02, 1:19' },
-  { flag: 'noticed', color: 'text-gold', border: 'border-gold/30', text: 'You sped up to 190 wpm when talking about your weakness', sub: 'nervous pace — the answer was fine, the speed gave you away' },
-  { flag: 'good', color: 'text-leaf', border: 'border-leaf/30', text: 'Your opening line answered the question directly', sub: 'most people take 30 seconds to get to the point. You took 4.' },
-  { flag: 'caught', color: 'text-coral', border: 'border-coral/30', text: '"I think I would maybe try to…" — weak language on a strength question', sub: 'say "I would" — you were asked about something you\'re good at' },
-  { flag: 'good', color: 'text-leaf', border: 'border-leaf/30', text: 'STAR structure: complete', sub: 'situation ✓ task ✓ action ✓ result ✓ — recruiters notice this' },
+  { flag: 'Caught', color: 'text-coral', bar: 'bg-coral', text: '“basically”, 5 times in 90 seconds', sub: 'Timestamps 0:07, 0:23, 0:41, 1:02 and 1:19' },
+  { flag: 'Noticed', color: 'text-gold', bar: 'bg-gold', text: 'You sped up to 190 wpm when talking about your weakness', sub: 'Nervous pace. The answer was fine, the speed gave you away.' },
+  { flag: 'Good', color: 'text-leaf', bar: 'bg-leaf', text: 'Your opening line answered the question directly', sub: 'Most people take 30 seconds to get to the point. You took 4.' },
+  { flag: 'Caught', color: 'text-coral', bar: 'bg-coral', text: '“I think I would maybe try to…”, weak language on a strength question', sub: 'Say “I would”. You were asked about something you’re good at.' },
+  { flag: 'Good', color: 'text-leaf', bar: 'bg-leaf', text: 'STAR structure: complete', sub: 'Situation, task, action, result. Recruiters notice this.' },
 ]
 
 export default function Features() {
   return (
-    <section id="why-it-works" className="relative grain py-24 bg-paper-dark">
-      <div className="max-w-6xl mx-auto px-6">
+    <section id="why-it-works" className="py-[var(--section-gap)] bg-paper-dark">
+      <div className="shell grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-12 lg:gap-20 items-start">
+        <Reveal className="lg:sticky lg:top-28">
+          <h2 className="display-section text-ink mb-6">
+            Feedback a friend wouldn’t dare give you
+          </h2>
+          <p className="lead mb-5 max-w-md">
+            Your friends say “that was good, yaar.” Your mirror says nothing.
+            Vocalize tells you what an interviewer notices but never says out loud.
+          </p>
+          <p className="text-ink-faint max-w-md">
+            Specific. Timestamped. Sometimes uncomfortable. Always one clear next step.
+          </p>
+        </Reveal>
 
-        <div className="grid lg:grid-cols-[1fr_1.2fr] gap-16 items-center">
-
-          {/* Left — text */}
-          <Reveal>
-            <p className="handnote text-2xl text-brand-700 mb-3">this is real feedback from a session</p>
-            <h2 className="font-display text-4xl lg:text-5xl font-semibold text-ink tracking-tight mb-6">
-              Feedback a friend
-              <br />wouldn't dare give you
-            </h2>
-            <p className="text-lg text-ink-soft leading-relaxed mb-6">
-              Your friends say "that was good, yaar." Your mirror says nothing.
-              Vocalize tells you what an interviewer notices but never says out loud.
-            </p>
-            <p className="text-ink-soft leading-relaxed">
-              Specific. Timestamped. Sometimes uncomfortable.
-              Always one clear next step.
-            </p>
-          </Reveal>
-
-          {/* Right — feedback rows styled as margin notes */}
-          <Reveal className="space-y-3" delay={150}>
-            {rows.map(({ flag, color, border, text, sub }) => (
-              <div key={text}
-                className={`bg-white rounded-xl border ${border} border-l-4 px-5 py-4`}>
-                <div className="flex items-baseline gap-3">
-                  <span className={`handnote text-lg ${color} shrink-0`}>{flag}</span>
-                  <div>
-                    <p className="text-[15px] text-ink font-medium leading-snug">{text}</p>
-                    <p className="text-sm text-ink-faint mt-1">{sub}</p>
-                  </div>
-                </div>
+        <motion.ol
+          className="border-t border-rule"
+          variants={staggerParent}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
+        >
+          {rows.map(({ flag, color, bar, text, sub }) => (
+            <motion.li
+              key={text}
+              variants={staggerChild}
+              className="relative grid grid-cols-[88px_minmax(0,1fr)] gap-5 py-6 border-b border-rule"
+            >
+              <span className={`text-sm font-semibold pt-1 flex items-center gap-2.5 ${color}`}>
+                <span className={`w-[3px] h-4 rounded-sm ${bar}`} aria-hidden="true" />
+                {flag}
+              </span>
+              <div>
+                <p className="text-lg text-ink font-medium leading-snug">{text}</p>
+                <p className="text-ink-faint mt-1.5">{sub}</p>
               </div>
-            ))}
-          </Reveal>
-
-        </div>
-
-        <WaveDivider className="mt-20" color="#cdd9d7" />
+            </motion.li>
+          ))}
+        </motion.ol>
       </div>
     </section>
   )

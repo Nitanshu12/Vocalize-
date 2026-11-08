@@ -44,11 +44,11 @@ export default function Register() {
     <AuthLayout
       eyebrow="Free. No credit card."
       title="Start speaking, out loud."
-      subtitle="Create your account — your first session is two minutes away."
+      subtitle="Create your account, your first session is two minutes away."
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         {formError && (
-          <p className="text-sm text-coral bg-coral/10 border border-coral/20 rounded-lg px-4 py-3">{formError}</p>
+          <p className="notice notice-error" role="alert">{formError}</p>
         )}
 
         <AuthInput
@@ -80,16 +80,16 @@ export default function Register() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-ink text-paper font-semibold hover:bg-ink/85 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="btn btn-primary w-full"
         >
           {submitting ? 'Creating account…' : 'Create account'}
-          {!submitting && <ArrowRight size={17} />}
+          {!submitting && <ArrowRight size={17} className="btn-arrow" />}
         </button>
       </form>
 
       <p className="text-sm text-ink-soft mt-8">
         Already practicing with us?{' '}
-        <Link to="/login" className="font-semibold text-ink hover:text-brand-700 transition-colors">
+        <Link to="/login" className="font-semibold text-accent hover:text-accent-soft underline-offset-4 hover:underline transition-colors">
           Log in
         </Link>
       </p>

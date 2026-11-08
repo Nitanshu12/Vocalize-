@@ -22,7 +22,7 @@ const GUIDED_FIELDS = [
   {
     key: 'studying_or_working',
     label: 'What are you studying or doing right now?',
-    placeholder: 'e.g. Final-year B.Tech CSE at VIT — or, Class 9 at DPS',
+    placeholder: 'e.g. Final-year B.Tech CSE at VIT, or, Class 9 at DPS',
   },
   {
     key: 'experience',
@@ -32,12 +32,12 @@ const GUIDED_FIELDS = [
   {
     key: 'skills',
     label: 'What are you good at?',
-    placeholder: 'In your own words — tools, subjects, or things people rely on you for',
+    placeholder: 'In your own words, tools, subjects, or things people rely on you for',
   },
   {
     key: 'goal',
     label: 'What are you aiming for next?',
-    placeholder: 'e.g. A product internship — or, getting confident at speaking on stage',
+    placeholder: 'e.g. A product internship, or, getting confident at speaking on stage',
   },
 ]
 
@@ -61,7 +61,7 @@ export default function ProfileGate({ token, track, profile, onSaved }) {
       onSaved(saved)
       setMode('summary')
     } catch (err) {
-      setError(err.message || 'Could not build your profile — please try again.')
+      setError(err.message || 'Could not build your profile, please try again.')
     } finally {
       setBusy('')
     }
@@ -76,7 +76,7 @@ export default function ProfileGate({ token, track, profile, onSaved }) {
       onSaved(saved)
       setMode('summary')
     } catch (err) {
-      setError(err.message || 'Could not read that resume — try the quick questions instead.')
+      setError(err.message || 'Could not read that resume, try the quick questions instead.')
     } finally {
       setBusy('')
       if (fileRef.current) fileRef.current.value = '' // allow re-picking the same file
@@ -86,7 +86,7 @@ export default function ProfileGate({ token, track, profile, onSaved }) {
   /* ------------------------------- summary ------------------------------- */
   if (mode === 'summary' && profile) {
     return (
-      <div className="rounded-2xl border border-brand-200 bg-white px-6 py-5 mb-6">
+      <div className="rounded-card border border-brand-200 bg-surface px-6 py-5 mb-6">
         <div className="flex items-start justify-between gap-4 mb-3">
           <p className="inline-flex items-center gap-2 text-sm font-semibold text-brand-700">
             <Check size={16} /> Your interviewer has read your background
@@ -119,8 +119,8 @@ export default function ProfileGate({ token, track, profile, onSaved }) {
         <div className="flex items-center gap-3">
           <div className="flex-1 h-1.5 rounded-full bg-paper-dark overflow-hidden">
             <div
-              className="h-full rounded-full bg-brand-600 transition-[width]"
-              style={{ width: `${profile.completeness ?? 0}%` }}
+              className="h-full rounded-full bg-brand-600 origin-left transition-transform duration-500"
+              style={{ transform: `scaleX(${(profile.completeness ?? 0) / 100})` }}
             />
           </div>
           <span className="text-xs text-ink-faint tabular-nums shrink-0">
@@ -139,10 +139,10 @@ export default function ProfileGate({ token, track, profile, onSaved }) {
   /* -------------------------------- guided ------------------------------- */
   if (mode === 'guided') {
     return (
-      <div className="rounded-2xl border border-ink/10 bg-white px-6 py-5 mb-6">
-        <p className="handnote text-xl text-brand-700 mb-1">tell us about you</p>
+      <div className="rounded-card border border-ink/10 bg-surface px-6 py-5 mb-6">
+        <p className="font-display text-xl font-semibold text-ink mb-1">Tell us about you</p>
         <p className="text-sm text-ink-soft mb-4">
-          Answer what you can — even one or two is enough to make a difference.
+          Answer what you can, even one or two is enough to make a difference.
         </p>
 
         <div className="space-y-4">
@@ -167,7 +167,7 @@ export default function ProfileGate({ token, track, profile, onSaved }) {
             type="button"
             onClick={submitGuided}
             disabled={busy === 'guided' || !Object.values(answers).some((v) => v.trim())}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-600 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all"
+            className="btn btn-primary"
           >
             {busy === 'guided' ? (
               <>
@@ -193,11 +193,11 @@ export default function ProfileGate({ token, track, profile, onSaved }) {
 
   /* -------------------------------- chooser ------------------------------ */
   return (
-    <div className="rounded-2xl border border-ink/10 bg-white px-6 py-5 mb-6">
-      <p className="handnote text-xl text-brand-700 mb-1">make it about you</p>
+    <div className="rounded-card border border-ink/10 bg-surface px-6 py-5 mb-6">
+      <p className="font-display text-xl font-semibold text-ink mb-1">Make it about you</p>
       <p className="text-sm text-ink-soft mb-4">
         Real interviewers read your background first. Give yours and the questions will be about
-        your actual work — not generic ones.
+        your actual work, not generic ones.
       </p>
 
       <div className="grid sm:grid-cols-2 gap-3">
@@ -226,7 +226,7 @@ export default function ProfileGate({ token, track, profile, onSaved }) {
                 )}
                 {busy === 'resume' ? 'Reading your resume…' : 'Upload resume'}
               </span>
-              <span className="block text-xs text-ink-faint mt-1">PDF, DOCX or TXT · fastest</span>
+              <span className="block text-xs text-ink-faint mt-1">PDF, DOCX or TXT. Fastest.</span>
             </button>
           </>
         )}
@@ -242,7 +242,7 @@ export default function ProfileGate({ token, track, profile, onSaved }) {
             Answer 4 quick questions
           </span>
           <span className="block text-xs text-ink-faint mt-1">
-            About 30 seconds · no resume needed
+            About 30 seconds, no resume needed
           </span>
         </button>
       </div>
@@ -250,7 +250,7 @@ export default function ProfileGate({ token, track, profile, onSaved }) {
       {error && <p className="text-sm text-coral mt-3">{error}</p>}
 
       <p className="text-xs text-ink-faint mt-4">
-        We keep only your education, experience and skills — never your phone number, email or
+        We keep only your education, experience and skills, never your phone number, email or
         address. You can delete this any time.
       </p>
     </div>

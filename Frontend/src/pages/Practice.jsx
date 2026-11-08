@@ -12,6 +12,7 @@ import {
   Video,
 } from 'lucide-react'
 import { WaveMark } from '../components/ui/Waveform'
+import { WaveLoader } from '../components/ui/Loader'
 import LevelUpCelebration from '../components/ui/LevelUpCelebration'
 import { useAuth } from '../context/AuthContext'
 import { practiceApi } from '../lib/api'
@@ -53,7 +54,7 @@ function formatClock(totalSeconds) {
 
 function MetricTile({ value, label }) {
   return (
-    <div className="rounded-2xl border border-ink/10 bg-white px-4 py-4 text-center">
+    <div className="rounded-card border border-ink/10 bg-surface px-4 py-4 text-center">
       <p className="font-display text-2xl font-semibold text-ink">{value}</p>
       <p className="text-xs text-ink-soft mt-1">{label}</p>
     </div>
@@ -62,15 +63,7 @@ function MetricTile({ value, label }) {
 
 function Chip({ active, onClick, children }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full border text-sm font-medium transition-all ${
-        active
-          ? 'border-brand-600 bg-brand-50 text-brand-700'
-          : 'border-ink/15 bg-white text-ink-soft hover:border-ink/40'
-      }`}
-    >
+    <button type="button" onClick={onClick} aria-pressed={active} className="chip">
       {children}
     </button>
   )
@@ -185,7 +178,7 @@ export default function Practice() {
       streamRef.current?.getTracks().forEach((t) => t.stop())
       streamRef.current = null
       setMediaError(
-        'We couldn’t start the session — allow mic/camera access, check your connection, and try again.'
+        'We couldn’t start the session, allow mic/camera access, check your connection, and try again.'
       )
       setStep('setup')
     } finally {
@@ -218,7 +211,7 @@ export default function Practice() {
     await stopAndGetBlob() // finish the local replay recording (blob stays on-device)
 
     if (!transcript) {
-      setSubmitError("We couldn't hear any words — check your mic and try again.")
+      setSubmitError("We couldn't hear any words, check your mic and try again.")
       setStep('setup')
       return
     }
@@ -247,7 +240,7 @@ export default function Practice() {
         })
       }
     } catch (err) {
-      setSubmitError(err.message || 'Something went wrong while scoring — please try again.')
+      setSubmitError(err.message || 'Something went wrong while scoring, please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -339,8 +332,7 @@ export default function Practice() {
 
   /* -------------------------------- render -------------------------------- */
   return (
-    <div className="relative min-h-screen bg-paper grain overflow-hidden px-6 py-10">
-      <div className="absolute -top-40 -right-40 w-[480px] h-[480px] bg-brand-100/50 rounded-full blur-3xl pointer-events-none" />
+    <div className="relative min-h-screen bg-paper overflow-hidden px-6 py-10">
 
       <div className="relative max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-10">
@@ -350,14 +342,13 @@ export default function Practice() {
           >
             <ArrowLeft size={16} /> Home
           </Link>
-          <WaveMark className="w-10 h-7" animate={step === 'record'} />
+          <WaveMark className="w-10 h-7 text-accent" animate={step === 'record'} />
         </div>
 
         {/* --------------------------------- SETUP --------------------------------- */}
         {step === 'setup' && (
           <div className="animate-fade-up">
-            <p className="handnote text-2xl text-brand-700 mb-2">let's get you talking</p>
-            <h1 className="font-display text-4xl font-semibold text-ink tracking-tight leading-[1.1] mb-6">
+            <h1 className="font-display text-4xl font-bold text-ink tracking-[-0.04em] leading-[1.05] mb-6">
               Practice a script
             </h1>
 
@@ -390,16 +381,13 @@ export default function Practice() {
                     key={p.id}
                     type="button"
                     onClick={() => setParagraphId(p.id)}
-                    className={`text-left rounded-2xl border px-5 py-4 transition-all ${
-                      paragraphId === p.id
-                        ? 'border-brand-600 bg-brand-50 shadow-[0_2px_20px_rgba(14,124,134,0.18)]'
-                        : 'border-ink/15 bg-white hover:border-ink/40'
-                    }`}
+                    aria-pressed={paragraphId === p.id}
+                    className="option px-5 py-4"
                   >
                     <div className="flex items-center justify-between gap-2 mb-1.5">
                       <span className="font-display text-lg font-semibold text-ink">{p.title}</span>
                       <span
-                        className={`shrink-0 text-[11px] font-semibold uppercase tracking-wide border rounded-full px-2 py-0.5 ${DIFFICULTY_BADGE[p.difficulty]}`}
+                        className={`shrink-0 text-xs font-semibold border rounded-full px-2 py-0.5 ${DIFFICULTY_BADGE[p.difficulty]}`}
                       >
                         {p.difficulty}
                       </span>
@@ -418,7 +406,7 @@ export default function Practice() {
                 rows={6}
                 maxLength={5000}
                 placeholder="Paste or write the paragraph you want to practice out loud…"
-                className="w-full rounded-2xl border border-ink/15 bg-white px-5 py-4 text-ink placeholder:text-ink-faint focus:outline-none focus:border-brand-600 mb-8 resize-y"
+                className="w-full rounded-card border border-ink/15 bg-surface px-5 py-4 text-ink placeholder:text-ink-faint focus:outline-none focus:border-brand-600 mb-8 resize-y"
               />
             )}
 
@@ -437,10 +425,10 @@ export default function Practice() {
             <p className="text-sm font-semibold text-ink mb-2">Pressure level</p>
             <div className="flex flex-wrap items-center gap-2 mb-8">
               <Chip active={!timed} onClick={() => setTimed(false)}>
-                Relaxed — no timer
+                Relaxed, no timer
               </Chip>
               <Chip active={timed} onClick={() => setTimed(true)}>
-                Timed — prep first
+                Timed, prep first
               </Chip>
               {timed && (
                 <span className="flex items-center gap-2 ml-1">
@@ -457,19 +445,19 @@ export default function Practice() {
               type="button"
               onClick={begin}
               disabled={!canStart}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-ink text-paper font-semibold text-lg hover:gap-3.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="btn btn-primary btn-lg"
             >
               Start practicing <ArrowRight size={19} />
             </button>
             <p className="text-xs text-ink-faint mt-3">
-              Your audio is transcribed for scoring, then discarded — recordings are never stored.
+              Your audio is transcribed for scoring, then discarded, recordings are never stored.
             </p>
             <div className="mt-6">
               <Link
                 to="/app/dashboard"
                 className="text-sm font-medium text-ink-soft hover:text-ink transition-colors"
               >
-                Skip for now →
+                Skip for now
               </Link>
             </div>
           </div>
@@ -478,11 +466,10 @@ export default function Practice() {
         {/* ---------------------------------- PREP ---------------------------------- */}
         {step === 'prep' && (
           <div className="animate-fade-up text-center">
-            <p className="handnote text-2xl text-brand-700 mb-2">take a breath, read it through</p>
-            <p className="font-display text-7xl font-semibold text-ink tracking-tight mb-8">
+            <p className="font-display text-7xl font-bold text-ink tracking-[-0.04em] mb-8">
               {formatClock(prepLeft)}
             </p>
-            <div className="text-left rounded-2xl border border-ink/10 bg-white px-6 py-5 max-h-56 overflow-y-auto mb-8">
+            <div className="text-left rounded-card border border-ink/10 bg-surface px-6 py-5 max-h-56 overflow-y-auto mb-8">
               <p className="text-ink leading-relaxed">{activeText}</p>
             </div>
             <button
@@ -491,9 +478,9 @@ export default function Practice() {
                 prepUsedRef.current = Math.max(0, prepMinutes * 60 - Math.max(0, prepLeft))
                 startRecording()
               }}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-ink text-paper font-semibold text-lg hover:gap-3.5 transition-all"
+              className="btn btn-primary btn-lg"
             >
-              I'm ready — start now <ArrowRight size={19} />
+              I’m ready, start now <ArrowRight size={19} />
             </button>
           </div>
         )}
@@ -510,7 +497,7 @@ export default function Practice() {
                 <span
                   className={`text-xs font-semibold border rounded-full px-3 py-1 ${paceStyle}`}
                 >
-                  {paceLabel} · {liveWpm} wpm
+                  {paceLabel}, {liveWpm} wpm
                 </span>
               )}
             </div>
@@ -521,16 +508,16 @@ export default function Practice() {
                 autoPlay
                 muted
                 playsInline
-                className="w-full max-h-72 object-cover rounded-3xl mb-5 -scale-x-100 bg-ink/90"
+                className="w-full max-h-72 object-cover rounded-card mb-5 -scale-x-100 bg-ink/90"
               />
             )}
 
-            <div className="rounded-2xl border border-ink/10 bg-white px-6 py-5 max-h-44 overflow-y-auto mb-4">
+            <div className="rounded-card border border-ink/10 bg-surface px-6 py-5 max-h-44 overflow-y-auto mb-4">
               <p className="text-ink leading-relaxed">{activeText}</p>
             </div>
 
-            <div className="rounded-2xl border border-brand-200 bg-brand-50/50 px-6 py-5 min-h-24 mb-8">
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-700 mb-2">
+            <div className="rounded-card border border-rule px-6 py-5 min-h-24 mb-8">
+              <p className="text-xs font-semibold text-brand-700 mb-2">
                 Live transcript
               </p>
               <p className="text-ink leading-relaxed">
@@ -546,7 +533,7 @@ export default function Practice() {
               <button
                 type="button"
                 onClick={finishRecording}
-                className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full bg-coral text-white font-semibold text-lg hover:opacity-90 transition-opacity"
+                className="btn btn-danger btn-lg"
               >
                 <Square size={18} fill="currentColor" /> Finish &amp; get scored
               </button>
@@ -559,8 +546,7 @@ export default function Practice() {
           <div className="animate-fade-up">
             {submitting && (
               <div className="text-center py-24">
-                <WaveMark className="w-16 h-11 mx-auto mb-6" animate />
-                <p className="handnote text-2xl text-brand-700">scoring your session…</p>
+                <WaveLoader label="Scoring your session…" />
               </div>
             )}
 
@@ -573,7 +559,7 @@ export default function Practice() {
                   <button
                     type="button"
                     onClick={practiceAgain}
-                    className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-ink text-paper font-semibold hover:gap-3.5 transition-all"
+                    className="btn btn-primary"
                   >
                     <RotateCcw size={17} /> Try again
                   </button>
@@ -584,8 +570,8 @@ export default function Practice() {
             {!submitting && result && (
               <div>
                 <div className="text-center mb-8">
-                  <p className="handnote text-2xl text-brand-700 mb-1">your score</p>
-                  <p className="font-display text-7xl font-semibold text-ink tracking-tight">
+                  <p className="text-ink-soft mb-1">Your score</p>
+                  <p className="font-display text-7xl font-bold text-ink tracking-[-0.04em]">
                     {result.session.overall_score}
                     <span className="text-2xl text-ink-faint">/100</span>
                   </p>
@@ -596,7 +582,7 @@ export default function Practice() {
                     <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-gold bg-gold/10 border border-gold/20 rounded-full px-4 py-1.5">
                       <Flame size={14} /> {result.gamification.current_streak}-day streak
                     </span>
-                    <span className="text-sm font-semibold text-ink-soft bg-white border border-ink/10 rounded-full px-4 py-1.5">
+                    <span className="text-sm font-semibold text-ink-soft bg-surface border border-ink/10 rounded-full px-4 py-1.5">
                       {result.gamification.total_points} total
                     </span>
                   </div>
@@ -622,9 +608,9 @@ export default function Practice() {
 
                 {/* AI coach — feedback, premium lock, or quiet failure note */}
                 {result.session.ai_feedback ? (
-                  <div className="rounded-3xl border border-brand-200 bg-white px-7 py-6 mb-8">
-                    <p className="inline-flex items-center gap-2 handnote text-2xl text-brand-700 mb-3">
-                      <Sparkles size={18} /> your AI coach says
+                  <div className="rounded-card border border-brand-200 bg-surface px-7 py-6 mb-8">
+                    <p className="inline-flex items-center gap-2 font-semibold text-accent mb-3">
+                      <Sparkles size={18} /> Your AI coach says
                     </p>
                     <p className="font-display text-xl font-semibold text-ink mb-4">
                       {result.session.ai_feedback.headline}
@@ -643,8 +629,8 @@ export default function Practice() {
                         </p>
                       ))}
                     </div>
-                    <div className="rounded-xl bg-brand-50 border border-brand-100 px-4 py-3">
-                      <p className="text-sm text-brand-800">
+                    <div className="border-l-2 border-accent pl-4 py-1">
+                      <p className="text-sm text-ink">
                         <span className="font-semibold">Next time:</span>{' '}
                         {result.session.ai_feedback.nextTip}
                       </p>
@@ -661,19 +647,19 @@ export default function Practice() {
                     )}
                   </div>
                 ) : result.ai.locked ? (
-                  <div className="rounded-3xl border border-ink/10 bg-white px-7 py-6 mb-8 text-center">
+                  <div className="rounded-card border border-ink/10 bg-surface px-7 py-6 mb-8 text-center">
                     <Lock size={22} className="mx-auto text-ink-faint mb-3" />
                     <p className="font-display text-xl font-semibold text-ink mb-1.5">
                       AI Coach is a premium feature
                     </p>
                     <p className="text-sm text-ink-soft max-w-sm mx-auto">
                       You've used your 3 free AI-coached sessions. Your scores and streaks stay
-                      free forever — premium coaching is coming soon.
+                      free forever, premium coaching is coming soon.
                     </p>
                   </div>
                 ) : result.ai.error ? (
                   <p className="text-xs text-ink-faint text-center mb-8">
-                    Your coach couldn't respond this time — your score was saved anyway.
+                    Your coach couldn't respond this time, your score was saved anyway.
                   </p>
                 ) : null}
 
@@ -684,7 +670,7 @@ export default function Practice() {
                       <span className="font-normal text-ink-faint">(stays on this device)</span>
                     </p>
                     {mode === 'video' ? (
-                      <video controls src={recordingUrl} className="w-full rounded-2xl" />
+                      <video controls src={recordingUrl} className="w-full rounded-card" />
                     ) : (
                       <audio controls src={recordingUrl} className="w-full" />
                     )}
@@ -695,13 +681,13 @@ export default function Practice() {
                   <button
                     type="button"
                     onClick={practiceAgain}
-                    className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-ink text-paper font-semibold hover:gap-3 transition-all"
+                    className="btn btn-primary"
                   >
                     <RotateCcw size={16} /> Practice again
                   </button>
                   <Link
                     to="/app/dashboard"
-                    className="inline-flex items-center px-7 py-3.5 rounded-full border border-ink/20 text-ink font-semibold hover:border-ink/50 transition-colors"
+                    className="btn btn-ghost"
                   >
                     Go to dashboard
                   </Link>

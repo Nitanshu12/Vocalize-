@@ -1,53 +1,59 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { AnimatePresence, motion } from 'motion/react'
 import { WaveMark } from '../ui/Waveform'
 
-export default function Navbar() {
+const LINKS = ['Modes', 'How it works', 'Why it works']
+const toId = (label) => `#${label.toLowerCase().replace(/\s+/g, '-')}`
+
+export default function Navbar({ shown = true }) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16)
-    window.addEventListener('scroll', onScroll)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   return (
-    <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-      scrolled ? 'bg-paper/90 backdrop-blur-md border-b border-ink/10' : 'bg-transparent'
-    }`}>
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-
-        {/* Logo — wordmark + waveform signature */}
-        <a href="#" className="flex items-center gap-2.5">
-          <WaveMark className="w-7 h-5" />
-          <span className="font-display text-xl font-semibold text-ink tracking-tight">Vocalize</span>
+    <motion.nav
+      className={`fixed top-0 inset-x-0 z-[300] border-b transition-colors duration-300 ${
+        scrolled || menuOpen ? 'bg-paper border-rule' : 'bg-transparent border-transparent'
+      }`}
+      initial={false}
+      animate={shown ? { y: 0, opacity: 1 } : { y: '-100%', opacity: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      inert={shown ? undefined : true}
+      aria-hidden={shown ? undefined : true}
+    >
+      <div className="shell h-[72px] flex items-center justify-between">
+        <a href="#" className="flex items-center gap-3 rounded-control">
+          <WaveMark className="w-8 h-6 text-accent" />
+          <span className="font-display text-xl font-bold tracking-[-0.03em] text-ink">Vocalize</span>
         </a>
 
-        {/* Desktop nav links */}
-        <div className="hidden md:flex items-center gap-8">
-          {['Modes', 'How it works', 'Why it works'].map(link => (
-            <a key={link} href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}
-              className="text-sm font-medium text-ink-soft hover:text-ink transition-colors">
+        <div className="hidden md:flex items-center gap-9">
+          {LINKS.map((link) => (
+            <a key={link} href={toId(link)} className="link-quiet text-[15px] font-medium rounded-sm">
               {link}
             </a>
           ))}
         </div>
 
-        {/* CTA + mobile toggle */}
-        <div className="flex items-center gap-4">
-          <Link to="/login" className="hidden md:block text-sm font-medium text-ink-soft hover:text-ink transition-colors">
+        <div className="flex items-center gap-3">
+          <Link to="/login" className="hidden md:inline-flex btn btn-sm btn-ghost border-transparent">
             Log in
           </Link>
-          <Link to="/register"
-            className="hidden md:inline-flex items-center px-4 py-2 rounded-full bg-ink text-paper text-sm font-semibold hover:bg-ink/85 transition-colors">
+          <Link to="/register" className="hidden md:inline-flex btn btn-sm btn-primary">
             Start speaking
           </Link>
 
           <button
             type="button"
-            className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-paper/20 bg-paper text-ink shadow-sm md:hidden focus:outline-none focus:ring-2 focus:ring-ink/20"
-            onClick={() => setMenuOpen(open => !open)}
+            className="btn btn-sm btn-ghost w-11 px-0 md:hidden"
+            onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           >
@@ -65,40 +71,41 @@ export default function Navbar() {
         </div>
       </div>
 
-      {menuOpen && (
-        <div className="md:hidden bg-paper/95 border-t border-paper/80 shadow-sm backdrop-blur-md">
-          <div className="max-w-6xl mx-auto px-6 py-4 space-y-4">
-            <div className="flex flex-col gap-3">
-              {['Modes', 'How it works', 'Why it works'].map(link => (
-                <a
-                  key={link}
-                  href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}
-                  onClick={() => setMenuOpen(false)}
-                  className="block text-base font-medium text-ink-soft hover:text-ink transition-colors"
-                >
-                  {link}
-                </a>
-              ))}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            key="mobile-menu"
+            className="md:hidden border-t border-rule bg-paper"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="shell py-5 space-y-5">
+              <div className="flex flex-col gap-4">
+                {LINKS.map((link) => (
+                  <a
+                    key={link}
+                    href={toId(link)}
+                    onClick={() => setMenuOpen(false)}
+                    className="block text-lg font-medium text-ink"
+                  >
+                    {link}
+                  </a>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-3 pt-5 border-t border-rule">
+                <Link to="/login" onClick={() => setMenuOpen(false)} className="btn btn-secondary">
+                  Log in
+                </Link>
+                <Link to="/register" onClick={() => setMenuOpen(false)} className="btn btn-primary">
+                  Start speaking
+                </Link>
+              </div>
             </div>
-            <div className="flex flex-col gap-3 pt-2 border-t border-paper/80">
-              <Link
-                to="/login"
-                onClick={() => setMenuOpen(false)}
-                className="block text-base font-medium text-ink-soft hover:text-ink transition-colors"
-              >
-                Log in
-              </Link>
-              <Link
-                to="/register"
-                onClick={() => setMenuOpen(false)}
-                className="inline-flex w-full justify-center items-center px-4 py-3 rounded-full bg-ink text-paper text-sm font-semibold hover:bg-ink/85 transition-colors"
-              >
-                Start speaking
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-    </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.nav>
   )
 }
