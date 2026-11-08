@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { WaveMark } from '../ui/Waveform'
+import { WaveLoader } from '../ui/Loader'
 
 export default function RequireAuth({ children, requireOnboarding = true }) {
   const { status, user } = useAuth()
@@ -8,7 +8,7 @@ export default function RequireAuth({ children, requireOnboarding = true }) {
   if (status === 'loading') {
     return (
       <div className="min-h-screen bg-paper flex items-center justify-center">
-        <WaveMark className="w-10 h-7" animate />
+        <WaveLoader />
       </div>
     )
   }

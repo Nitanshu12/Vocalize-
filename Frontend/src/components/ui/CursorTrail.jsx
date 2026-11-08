@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 
-const COLORS = ['#0b636b', '#0e7c86', '#094e55', '#2ba3ab', '#0f2a2e']
+// Particle colours come from the tokens in tokens.css, read at mount.
+const TOKENS = ['--color-accent', '--color-accent-2', '--color-olive', '--color-ink-2']
 
 export default function CursorTrail() {
   const canvasRef = useRef(null)
@@ -11,6 +12,11 @@ export default function CursorTrail() {
     if (!isFine || reduced) return
 
     document.documentElement.classList.add('vocalize-cursor-active')
+
+    const css = getComputedStyle(document.documentElement)
+    const COLORS = TOKENS.map((t) => css.getPropertyValue(t).trim())
+    const CORE = css.getPropertyValue('--color-ink').trim()
+    const RING = css.getPropertyValue('--color-accent').trim()
 
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
@@ -119,13 +125,13 @@ export default function CursorTrail() {
         ctx.globalAlpha = 1
         ctx.beginPath()
         ctx.arc(cursor.x, cursor.y, 4.5, 0, Math.PI * 2)
-        ctx.fillStyle = '#0f2a2e'
+        ctx.fillStyle = CORE
         ctx.fill()
 
         ctx.globalAlpha = 0.55
         ctx.beginPath()
         ctx.arc(cursor.x, cursor.y, 9, 0, Math.PI * 2)
-        ctx.strokeStyle = '#0b636b'
+        ctx.strokeStyle = RING
         ctx.lineWidth = 1.5
         ctx.stroke()
       }
@@ -147,6 +153,7 @@ export default function CursorTrail() {
   return (
     <canvas
       ref={canvasRef}
+      aria-hidden="true"
       className="fixed inset-0 z-[9999] pointer-events-none hidden md:block"
     />
   )

@@ -1,0 +1,32 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "site",
+  "shape": "session-as-blocks",
+  "theme": "custom",
+  "axes": "dark/grotesk-heavy/warm",
+  "hero": "three heavy lines left, palette mosaic of a session right",
+  "nav": "edge-aligned",
+  "footer": "wordmark mast",
+  "imagery": "product",
+  "photos": [],
+  "entry": "intro loader",
+  "sections": [
+   "hero",
+   "rooms index",
+   "pinned session story",
+   "feedback log",
+   "week blocks",
+   "khaki cta",
+   "footer"
+  ],
+  "signature": "marked-up transcript in the hero mosaic",
+  "waived": [
+   "28b",
+   "39b"
+  ],
+  "prompt": "speech practice platform, Realtime Colors brown and khaki palette",
+  "date": "2026-11-08"
+ }
+]

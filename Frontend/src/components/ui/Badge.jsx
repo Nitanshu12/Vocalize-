@@ -1,13 +1,13 @@
 export default function Badge({ children, color = 'violet' }) {
   const colors = {
-    violet: 'bg-brand-100 text-brand-600',
-    green:  'bg-emerald-50 text-emerald-600',
-    amber:  'bg-amber-50 text-amber-600',
-    gold:   'bg-amber-50 text-amber-500',
-    gray:   'bg-gray-100 text-gray-600',
+    violet: 'bg-paper-deep text-accent',
+    green: 'bg-leaf/10 text-leaf',
+    amber: 'bg-gold/10 text-gold',
+    gold: 'bg-gold/10 text-gold',
+    gray: 'bg-surface text-ink-soft',
   }
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${colors[color]}`}>
+    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-control text-xs font-semibold ${colors[color]}`}>
       {children}
     </span>
   )

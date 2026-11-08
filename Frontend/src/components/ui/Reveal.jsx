@@ -1,34 +1,19 @@
-import { useEffect, useRef, useState } from 'react'
+import { motion } from 'motion/react'
+import { EASE } from './motion'
 
-export default function Reveal({ children, className = '', delay = 0 }) {
-  const ref = useRef(null)
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true)
-          observer.disconnect()
-        }
-      },
-      { threshold: 0.15 }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
+/* Scroll-triggered reveal: rises 24px and fades in once, when a fifth of it is on screen.
+ * MotionConfig reducedMotion="user" (App.jsx) drops the rise for people who ask for less motion. */
+export default function Reveal({ children, className = '', delay = 0, as = 'div' }) {
+  const Tag = motion[as] ?? motion.div
   return (
-    <div
-      ref={ref}
-      className={`${className} transition-all duration-700 ease-out ${
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-      }`}
-      style={{ transitionDelay: visible ? `${delay}ms` : '0ms' }}
+    <Tag
+      className={className}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.7, ease: EASE, delay: delay / 1000 }}
     >
       {children}
-    </div>
+    </Tag>
   )
 }

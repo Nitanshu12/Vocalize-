@@ -1,16 +1,17 @@
+import { useId } from 'react'
+
 export default function AuthInput({ label, error, className = '', ...props }) {
+  const errorId = useId()
   return (
     <label className={`block ${className}`}>
-      <span className="block text-sm font-medium text-ink mb-1.5">{label}</span>
+      <span className="block text-sm font-medium text-ink-soft mb-2">{label}</span>
       <input
-        className={`w-full px-4 py-2.5 rounded-lg border bg-white text-ink placeholder:text-ink-faint outline-none transition-colors ${
-          error
-            ? 'border-coral focus:border-coral'
-            : 'border-ink/15 focus:border-brand-600'
-        }`}
+        className="field"
+        aria-invalid={error ? 'true' : undefined}
+        aria-describedby={error ? errorId : undefined}
         {...props}
       />
-      {error && <span className="block text-sm text-coral mt-1.5">{error}</span>}
+      {error && <span id={errorId} className="block text-sm text-coral mt-1.5">{error}</span>}
     </label>
   )
 }

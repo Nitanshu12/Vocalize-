@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { MotionConfig } from 'motion/react'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -13,55 +14,57 @@ import { AuthProvider } from './context/AuthContext'
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <CursorTrail />
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route
-            path="/onboarding"
-            element={
-              <RequireAuth requireOnboarding={false}>
-                <Onboarding />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/app"
-            element={
-              <RequireAuth>
-                <AppHome />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/app/practice"
-            element={
-              <RequireAuth>
-                <Practice />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/app/interview"
-            element={
-              <RequireAuth>
-                <Interview />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/app/dashboard"
-            element={
-              <RequireAuth>
-                <Dashboard />
-              </RequireAuth>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <MotionConfig reducedMotion="user">
+      <AuthProvider>
+        <BrowserRouter>
+          <CursorTrail />
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/onboarding"
+              element={
+                <RequireAuth requireOnboarding={false}>
+                  <Onboarding />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/app"
+              element={
+                <RequireAuth>
+                  <AppHome />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/app/practice"
+              element={
+                <RequireAuth>
+                  <Practice />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/app/interview"
+              element={
+                <RequireAuth>
+                  <Interview />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/app/dashboard"
+              element={
+                <RequireAuth>
+                  <Dashboard />
+                </RequireAuth>
+              }
+            />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </MotionConfig>
   )
 }

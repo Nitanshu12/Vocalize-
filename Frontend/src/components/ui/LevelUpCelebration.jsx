@@ -16,7 +16,8 @@ import { ArrowRight, Sparkles } from 'lucide-react'
  * onClose ().
  */
 
-const CONFETTI_COLORS = ['#0e7c86', '#e0a92e', '#e2725b', '#4c9a6b', '#a7d8d4']
+// Confetti colours come from the tokens, read when the burst starts.
+const CONFETTI_TOKENS = ['--color-accent', '--color-accent-2', '--color-warn', '--color-success', '--color-ink']
 
 function prefersReducedMotion() {
   return (
@@ -63,6 +64,8 @@ export default function LevelUpCelebration({ level, previousLevel, onClose }) {
 
     const canvas = canvasRef.current
     if (!canvas) return
+    const css = getComputedStyle(document.documentElement)
+    const CONFETTI_COLORS = CONFETTI_TOKENS.map((t) => css.getPropertyValue(t).trim())
     const ctx = canvas.getContext('2d')
     const dpr = window.devicePixelRatio || 1
     const W = (canvas.width = window.innerWidth * dpr)
@@ -121,7 +124,7 @@ export default function LevelUpCelebration({ level, previousLevel, onClose }) {
     >
       {/* backdrop */}
       <div
-        className="absolute inset-0 bg-ink/70 backdrop-blur-sm animate-[luFade_.3s_ease-out]"
+        className="absolute inset-0 bg-paper/90 animate-[luFade_.3s_ease-out]"
         onClick={onClose}
       />
       {/* confetti canvas sits above the backdrop, below the card */}
@@ -131,28 +134,28 @@ export default function LevelUpCelebration({ level, previousLevel, onClose }) {
         style={{ width: '100%', height: '100%' }}
       />
 
-      <div className="relative w-full max-w-sm rounded-[2rem] bg-paper border border-white/20 shadow-2xl px-8 py-10 text-center animate-[luPop_.5s_cubic-bezier(.34,1.56,.64,1)]">
-        <p className="handnote text-2xl text-brand-700 mb-1">level unlocked!</p>
+      <div className="relative w-full max-w-sm rounded-card bg-surface border border-rule px-8 py-10 text-center animate-[luPop_.5s_cubic-bezier(.34,1.56,.64,1)]">
+        <p className="text-accent font-semibold mb-1">Level unlocked</p>
 
         {/* level ring */}
         <div className="relative mx-auto my-5 w-28 h-28">
           <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-            <circle cx="50" cy="50" r="44" fill="none" stroke="#d3ebe9" strokeWidth="8" />
+            <circle cx="50" cy="50" r="44" fill="none" className="stroke-rule" strokeWidth="8" />
             <circle
               cx="50"
               cy="50"
               r="44"
               fill="none"
-              stroke="#0e7c86"
+              className="stroke-accent"
               strokeWidth="8"
               strokeLinecap="round"
               strokeDasharray="276"
               strokeDashoffset="276"
-              className="animate-[luRing_.9s_.2s_ease-out_forwards]"
+              style={{ animation: 'luRing .9s .2s ease-out forwards' }}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">
+            <span className="text-xs text-ink-faint">
               Level
             </span>
             <span className="font-display text-4xl font-semibold text-ink leading-none">
@@ -174,10 +177,10 @@ export default function LevelUpCelebration({ level, previousLevel, onClose }) {
         <button
           type="button"
           onClick={onClose}
-          className="w-full inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-ink text-paper font-semibold text-lg hover:gap-3.5 transition-all"
+          className="btn btn-primary btn-lg w-full"
           autoFocus
         >
-          Continue <ArrowRight size={18} />
+          Continue <ArrowRight size={18} className="btn-arrow" />
         </button>
       </div>
 
@@ -188,6 +191,7 @@ export default function LevelUpCelebration({ level, previousLevel, onClose }) {
           100% { opacity: 1; transform: scale(1) translateY(0) }
         }
         @keyframes luRing { to { stroke-dashoffset: 0 } }
+        @media (prefers-reduced-motion: reduce) { .lu-anim { animation: none !important } }
       `}</style>
     </div>
   )

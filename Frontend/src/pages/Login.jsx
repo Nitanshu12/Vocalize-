@@ -32,13 +32,12 @@ export default function Login() {
 
   return (
     <AuthLayout
-      eyebrow="Welcome back"
       title="Good to see you again."
       subtitle="Log in to pick up where you left off."
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         {formError && (
-          <p className="text-sm text-coral bg-coral/10 border border-coral/20 rounded-lg px-4 py-3">{formError}</p>
+          <p className="notice notice-error" role="alert">{formError}</p>
         )}
 
         <AuthInput
@@ -61,16 +60,16 @@ export default function Login() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-ink text-paper font-semibold hover:bg-ink/85 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="btn btn-primary w-full"
         >
           {submitting ? 'Logging in…' : 'Log in'}
-          {!submitting && <ArrowRight size={17} />}
+          {!submitting && <ArrowRight size={17} className="btn-arrow" />}
         </button>
       </form>
 
       <p className="text-sm text-ink-soft mt-8">
         New to Vocalize?{' '}
-        <Link to="/register" className="font-semibold text-ink hover:text-brand-700 transition-colors">
+        <Link to="/register" className="font-semibold text-accent hover:text-accent-soft underline-offset-4 hover:underline transition-colors">
           Create an account
         </Link>
       </p>
